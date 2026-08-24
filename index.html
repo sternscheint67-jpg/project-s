@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="摂津レジ">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>摂津(せっつ)レジ</title>
+<style>
+:root {
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --text: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --accent: #0071e3;
+  --success: #30b350;
+  --danger: #ff3b30;
+  --warning-text: #b9650a;
+  --hairline: rgba(0,0,0,0.08);
+  --fill-quiet: #e8e8ed;
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 10px 24px rgba(0,0,0,0.05);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 24px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.screen { max-width: 1200px; margin: 0 auto; }
+
+h1 { text-align:center; font-size:28px; font-weight:700; letter-spacing:-0.01em; margin:8px 0 24px; }
+h2 { font-size:17px; font-weight:600; letter-spacing:-0.01em; margin:0 0 12px; }
+
+button { font-family: inherit; -webkit-tap-highlight-color: transparent; }
+button:active { transform: scale(0.96); }
+@media (prefers-reduced-motion: reduce) {
+  button:active { transform: none; }
+}
+
+.link-btn { background:none; border:none; color:var(--accent); font-size:15px; font-weight:500; cursor:pointer; padding:8px 4px; }
+.link-btn:active { opacity:0.5; transform:none; }
+
+.top-nav { display:flex; justify-content:center; gap:24px; margin-top:20px; }
+
+.register-layout { display:flex; gap:20px; align-items:flex-start; }
+.register-left { flex:0 0 360px; background:var(--surface); border-radius:var(--radius-lg); padding:22px 24px; box-shadow:var(--shadow-card); }
+.register-right { flex:1; }
+
+#product-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; max-height:680px; overflow-y:auto; padding:4px; }
+.product-btn {
+  border:none; border-radius:var(--radius-md); padding:12px; min-height:110px;
+  font-size:16px; font-weight:600; letter-spacing:-0.01em; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; line-height:1.3;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.25);
+  transition: box-shadow 100ms ease-out;
+}
+.product-btn:active { box-shadow: 0 1px 1px rgba(0,0,0,0.08); }
+
+#cart-list { min-height:60px; margin-bottom:6px; }
+.cart-line { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 2px; border-bottom:1px solid var(--hairline); font-size:16px; }
+.cart-line-name { flex:1; font-weight:500; }
+.cart-line-amount { font-weight:600; white-space:nowrap; font-variant-numeric: tabular-nums; }
+.cart-line-minus { background:var(--fill-quiet); color:var(--text); border:none; border-radius:9px; width:32px; height:32px; font-size:16px; font-weight:600; cursor:pointer; }
+
+.cart-total-row { display:flex; align-items:baseline; justify-content:space-between; font-size:22px; font-weight:700; padding:16px 0 6px; border-top:1px solid var(--hairline); margin-top:6px; letter-spacing:-0.01em; }
+.cart-total-row span:last-child { font-variant-numeric: tabular-nums; }
+#tax-toggle-btn { background:var(--fill-quiet); color:var(--text); border:none; border-radius:10px; padding:10px 14px; font-size:13px; font-weight:600; cursor:pointer; margin-top:10px; width:100%; }
+
+.btn-checkout { width:100%; background:var(--success); color:white; border:none; border-radius:var(--radius-md); padding:18px 0; font-size:19px; font-weight:700; letter-spacing:-0.01em; margin-top:18px; cursor:pointer; box-shadow:0 4px 12px rgba(48,179,80,0.3); }
+.btn-reset-all { width:100%; background:var(--fill-quiet); color:var(--text-secondary); border:none; border-radius:var(--radius-sm); padding:12px 0; font-size:14px; font-weight:600; margin-top:10px; cursor:pointer; }
+
+.settings-section { background:var(--surface); border-radius:var(--radius-lg); padding:20px 24px; margin-bottom:18px; box-shadow:var(--shadow-card); }
+.settings-section label { display:block; font-size:14px; color:var(--text-secondary); margin:12px 0 6px; }
+.settings-section input[type="text"], .settings-section input[type="number"] {
+  font-family:inherit; font-size:16px; background:var(--fill-quiet); border:none; border-radius:10px; padding:10px 12px; width:100%; max-width:280px;
+}
+.settings-section button:not(.link-btn) {
+  background:var(--accent); color:white; border:none; border-radius:10px; padding:10px 18px; font-size:15px; font-weight:600; cursor:pointer; margin-top:4px;
+}
+
+.color-palette { display:flex; flex-wrap:wrap; gap:10px; margin:12px 0; }
+.color-swatch { width:38px; height:38px; border-radius:11px; border:3px solid transparent; cursor:pointer; padding:0; }
+.color-swatch.selected { border-color:var(--text); }
+#product-list { list-style:none; padding:0; margin:14px 0 0; }
+#product-list li { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--hairline); }
+.product-swatch-preview { width:26px; height:26px; border-radius:8px; flex-shrink:0; display:inline-block; }
+.product-list-name { flex:1; font-weight:500; }
+
+.checkout-card { max-width:420px; margin:0 auto; background:var(--surface); border-radius:var(--radius-lg); padding:24px 26px; box-shadow:var(--shadow-card); }
+.checkout-total-row, .checkout-received-row, .checkout-change-row { display:flex; justify-content:space-between; align-items:baseline; padding:10px 0; font-size:18px; }
+.checkout-total-row { font-weight:700; border-bottom:1px solid var(--hairline); }
+.checkout-change-row { font-size:20px; font-weight:700; }
+.checkout-change-row.checkout-warning { color:var(--warning-text); }
+#received-amount-display, #checkout-total-amount { font-variant-numeric: tabular-nums; }
+
+.keypad { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:20px 0; }
+.keypad-btn { background:var(--fill-quiet); border:none; border-radius:14px; font-size:22px; font-weight:500; padding:18px 0; cursor:pointer; color:var(--text); }
+.keypad-btn-quiet { font-size:15px; font-weight:600; color:var(--text-secondary); }
+
+.btn-confirm-checkout { width:100%; background:var(--success); color:white; border:none; border-radius:var(--radius-md); padding:16px 0; font-size:17px; font-weight:700; cursor:pointer; }
+.btn-confirm-checkout:disabled { background:var(--fill-quiet); color:var(--text-secondary); cursor:not-allowed; }
+.btn-confirm-checkout:disabled:active { transform:none; }
+.btn-cancel-checkout { width:100%; text-align:center; margin-top:10px; }
+
+.records-toolbar { display:flex; justify-content:flex-end; margin-bottom:12px; }
+.btn-delete-records { background:var(--danger); color:white; border:none; border-radius:10px; padding:10px 16px; font-size:14px; font-weight:600; cursor:pointer; }
+.btn-delete-records:disabled { background:var(--fill-quiet); color:var(--text-secondary); cursor:not-allowed; }
+
+#records-list { background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); overflow:hidden; }
+.record-row { border-bottom:1px solid var(--hairline); }
+.record-row:last-child { border-bottom:none; }
+.record-row-main { display:flex; align-items:center; gap:12px; padding:14px 18px; cursor:pointer; }
+.record-row-checkbox { flex-shrink:0; width:20px; height:20px; }
+.record-row-datetime { color:var(--text-secondary); font-size:13px; width:100px; flex-shrink:0; }
+.record-row-total { flex:1; font-weight:600; font-variant-numeric: tabular-nums; }
+.record-row-received, .record-row-change { color:var(--text-secondary); font-size:13px; font-variant-numeric: tabular-nums; width:110px; text-align:right; }
+.record-detail { display:none; padding:4px 18px 16px 56px; background:var(--bg); }
+.record-detail.expanded { display:block; }
+.record-detail-line { display:flex; justify-content:space-between; font-size:14px; padding:4px 0; color:var(--text-secondary); }
+.records-empty { text-align:center; color:var(--text-secondary); padding:40px 0; }
+
+@media (max-width: 700px) {
+  body { padding:14px; }
+  h1 { font-size:22px; margin:4px 0 16px; }
+  .register-layout { flex-direction:column; }
+  .register-left { flex:none; width:100%; padding:16px 18px; }
+  .register-right { width:100%; }
+  #product-grid { grid-template-columns:repeat(3,1fr); max-height:none; gap:10px; }
+  .product-btn { min-height:80px; font-size:14px; padding:8px; }
+  .checkout-card { padding:18px; }
+  .keypad-btn { padding:14px 0; font-size:19px; }
+  .record-row-datetime { width:76px; font-size:11px; }
+  .record-row-received, .record-row-change { width:auto; font-size:11px; }
+}
+
+@media (max-width: 420px) {
+  #product-grid { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<div id="screen-register" class="screen" style="display:none">
+  <div class="register-layout">
+    <div class="register-left">
+      <div id="cart-list"></div>
+      <div class="cart-total-row">
+        <span><ruby>合計<rt>ごうけい</rt></ruby>(<span id="cart-total-tax-label"></span>)</span>
+        <span id="cart-total-amount">￥0</span>
+      </div>
+      <button id="tax-toggle-btn" style="display:none"></button>
+      <button id="checkout-btn" class="btn-checkout"><ruby>会計<rt>かいけい</rt></ruby></button>
+      <button id="reset-btn" class="btn-reset-all"><ruby>全部<rt>ぜんぶ</rt></ruby>リセット</button>
+    </div>
+    <div class="register-right">
+      <div id="product-grid"></div>
+    </div>
+  </div>
+  <div class="top-nav">
+    <button id="open-records-from-register" class="link-btn"><ruby>記録<rt>きろく</rt></ruby></button>
+    <button id="open-settings-from-register" class="link-btn"><ruby>設定<rt>せってい</rt></ruby></button>
+  </div>
+</div>
+
+<div id="screen-checkout" class="screen" style="display:none">
+  <h1><ruby>会計<rt>かいけい</rt></ruby></h1>
+  <div class="checkout-card">
+    <div class="checkout-total-row">
+      <span><ruby>合計<rt>ごうけい</rt></ruby>(<span id="checkout-total-tax-label"></span>)</span>
+      <span id="checkout-total-amount">￥0</span>
+    </div>
+    <div class="checkout-received-row">
+      <span>もらった<ruby>金額<rt>きんがく</rt></ruby></span>
+      <span id="received-amount-display">￥0</span>
+    </div>
+    <div id="change-row" class="checkout-change-row"></div>
+    <div id="keypad" class="keypad">
+      <button type="button" class="keypad-btn" data-digit="1">1</button>
+      <button type="button" class="keypad-btn" data-digit="2">2</button>
+      <button type="button" class="keypad-btn" data-digit="3">3</button>
+      <button type="button" class="keypad-btn" data-digit="4">4</button>
+      <button type="button" class="keypad-btn" data-digit="5">5</button>
+      <button type="button" class="keypad-btn" data-digit="6">6</button>
+      <button type="button" class="keypad-btn" data-digit="7">7</button>
+      <button type="button" class="keypad-btn" data-digit="8">8</button>
+      <button type="button" class="keypad-btn" data-digit="9">9</button>
+      <button type="button" id="keypad-clear" class="keypad-btn keypad-btn-quiet">クリア</button>
+      <button type="button" class="keypad-btn" data-digit="0">0</button>
+      <button type="button" id="keypad-backspace" class="keypad-btn keypad-btn-quiet">⌫</button>
+    </div>
+    <button id="confirm-checkout-btn" class="btn-confirm-checkout">この<ruby>金額<rt>きんがく</rt></ruby>で<ruby>会計<rt>かいけい</rt></ruby>する</button>
+    <div class="btn-cancel-checkout">
+      <button id="cancel-checkout-btn" class="link-btn">← もどる</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-records" class="screen" style="display:none">
+  <h1><ruby>記録<rt>きろく</rt></ruby></h1>
+  <div class="records-toolbar">
+    <button id="delete-selected-records-btn" class="btn-delete-records" disabled><ruby>選択<rt>せんたく</rt></ruby>した<ruby>記録<rt>きろく</rt></ruby>を<ruby>削除<rt>さくじょ</rt></ruby></button>
+  </div>
+  <div id="records-list"></div>
+  <div style="text-align:center;margin-top:16px;">
+    <button id="back-to-register-from-records" class="link-btn">← <ruby>戻<rt>もど</rt></ruby>る</button>
+  </div>
+</div>
+
+<div id="screen-settings" class="screen" style="display:none">
+  <h1><ruby>設定<rt>せってい</rt></ruby></h1>
+
+  <section class="settings-section">
+    <h2><ruby>商品<rt>しょうひん</rt></ruby>の<ruby>登録<rt>とうろく</rt></ruby></h2>
+    <label><ruby>名前<rt>なまえ</rt></ruby>
+      <input type="text" id="product-name-input">
+    </label><br>
+    <label><ruby>税抜<rt>ぜいぬ</rt></ruby>き<ruby>価格<rt>かかく</rt></ruby>
+      <input type="number" id="product-price-input" min="0" step="10">円
+    </label><br>
+    <div id="color-palette" class="color-palette"></div>
+    <button id="save-product-btn"><ruby>登録<rt>とうろく</rt></ruby></button>
+    <button id="cancel-edit-btn" class="link-btn" style="display:none"><ruby>取<rt>と</rt></ruby>り<ruby>消<rt>け</rt></ruby>す</button>
+    <ul id="product-list"></ul>
+  </section>
+
+  <section class="settings-section">
+    <h2><ruby>消費税<rt>しょうひぜい</rt></ruby>の<ruby>設定<rt>せってい</rt></ruby></h2>
+    <label><ruby>税率<rt>ぜいりつ</rt></ruby>
+      <input type="number" id="tax-rate-input" min="0" step="1">%
+    </label>
+    <button id="save-tax-rate-btn"><ruby>税率<rt>ぜいりつ</rt></ruby>を<ruby>保存<rt>ほぞん</rt></ruby></button>
+    <br><br>
+    <div>
+      <label><input type="radio" name="tax-display-mode" value="toggle"><ruby>都度<rt>つど</rt></ruby>ボタンで<ruby>切<rt>き</rt></ruby>り<ruby>替<rt>か</rt></ruby>える</label><br>
+      <label><input type="radio" name="tax-display-mode" value="alwaysExcluding"><ruby>常<rt>つね</rt></ruby>に<ruby>税抜<rt>ぜいぬ</rt></ruby>きで<ruby>表示<rt>ひょうじ</rt></ruby>する</label><br>
+      <label><input type="radio" name="tax-display-mode" value="alwaysIncluding"><ruby>常<rt>つね</rt></ruby>に<ruby>税込<rt>ぜいこ</rt></ruby>みで<ruby>表示<rt>ひょうじ</rt></ruby>する</label>
+    </div>
+  </section>
+
+  <section class="settings-section">
+    <h2>バックアップ</h2>
+    <button id="export-backup-btn"><ruby>保存<rt>ほぞん</rt></ruby>ファイルを<ruby>書<rt>か</rt></ruby>き<ruby>出<rt>だ</rt></ruby>す</button>
+    <button id="import-backup-btn"><ruby>保存<rt>ほぞん</rt></ruby>ファイルを<ruby>読<rt>よ</rt></ruby>み<ruby>込<rt>こ</rt></ruby>む</button>
+    <input type="file" id="import-backup-input" accept="application/json" style="display:none">
+  </section>
+
+  <button id="back-to-register-btn" class="link-btn">← <ruby>戻<rt>もど</rt></ruby>る</button>
+</div>
+
+<script id="core-logic">
+(function(){
+
+var COLOR_PALETTE = [
+  '#e53e3e', '#dd6b20', '#d69e2e', '#ecc94b', '#38a169',
+  '#48bb78', '#319795', '#00b5d8', '#3182ce', '#2b6cb0',
+  '#5a67d8', '#805ad5', '#d53f8c', '#ed64a6', '#718096',
+  '#4a5568', '#975a16', '#276749', '#b83280', '#c53030'
+];
+
+function textColorForBackground(hex) {
+  var clean = hex.replace('#', '');
+  var r = parseInt(clean.substring(0, 2), 16);
+  var g = parseInt(clean.substring(2, 4), 16);
+  var b = parseInt(clean.substring(4, 6), 16);
+  var brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness >= 128 ? '#000000' : '#ffffff';
+}
+
+function nextId(items) {
+  return items.length > 0
+    ? Math.max.apply(null, items.map(function(i) { return i.id; })) + 1
+    : 1;
+}
+
+function defaultState() {
+  return {
+    products: [],
+    settings: { taxRatePercent: 10, taxDisplayMode: 'toggle' },
+    cart: { items: [], taxDisplayToggleState: 'excluding' },
+    records: []
+  };
+}
+
+function normalizeProducts(rawProducts) {
+  return Array.isArray(rawProducts) ? rawProducts.map(function(p) {
+    return {
+      id: p.id,
+      name: p.name,
+      priceExcludingTax: (typeof p.priceExcludingTax === 'number' && p.priceExcludingTax >= 0) ? p.priceExcludingTax : 0,
+      colorIndex: (typeof p.colorIndex === 'number' && p.colorIndex >= 0 && p.colorIndex < 20) ? p.colorIndex : 0
+    };
+  }) : [];
+}
+
+function normalizeSettings(rawSettings) {
+  return Object.assign({}, defaultState().settings, rawSettings || {});
+}
+
+function normalizeRecords(rawRecords) {
+  return Array.isArray(rawRecords) ? rawRecords.map(function(r) {
+    return {
+      id: r.id,
+      recordedAt: r.recordedAt,
+      lines: Array.isArray(r.lines) ? r.lines.map(function(l) {
+        return { name: l.name, count: l.count, subtotalExcludingTax: l.subtotalExcludingTax };
+      }) : [],
+      totalMode: (r.totalMode === 'including' || r.totalMode === 'excluding') ? r.totalMode : 'excluding',
+      totalAmount: (typeof r.totalAmount === 'number') ? r.totalAmount : 0,
+      receivedAmount: (typeof r.receivedAmount === 'number') ? r.receivedAmount : 0,
+      changeAmount: (typeof r.changeAmount === 'number') ? r.changeAmount : 0
+    };
+  }) : [];
+}
+
+function serializeState(state) {
+  return JSON.stringify(state);
+}
+
+function parseState(json) {
+  var parsed = JSON.parse(json);
+  var base = defaultState();
+  var cartItems = (parsed.cart && Array.isArray(parsed.cart.items)) ? parsed.cart.items.map(function(i) {
+    return { productId: i.productId, count: i.count };
+  }) : [];
+  var toggleState = (parsed.cart && (parsed.cart.taxDisplayToggleState === 'including' || parsed.cart.taxDisplayToggleState === 'excluding'))
+    ? parsed.cart.taxDisplayToggleState
+    : base.cart.taxDisplayToggleState;
+  return {
+    products: normalizeProducts(parsed.products),
+    settings: normalizeSettings(parsed.settings),
+    cart: { items: cartItems, taxDisplayToggleState: toggleState },
+    records: normalizeRecords(parsed.records)
+  };
+}
+
+function serializeBackup(state) {
+  return JSON.stringify({ products: state.products, settings: state.settings, records: state.records });
+}
+
+function parseBackup(json) {
+  var parsed = JSON.parse(json);
+  return {
+    products: normalizeProducts(parsed.products),
+    settings: normalizeSettings(parsed.settings),
+    records: normalizeRecords(parsed.records)
+  };
+}
+
+function addProduct(state, input) {
+  var product = {
+    id: nextId(state.products),
+    name: input.name,
+    priceExcludingTax: input.priceExcludingTax,
+    colorIndex: input.colorIndex
+  };
+  return Object.assign({}, state, { products: state.products.concat([product]) });
+}
+
+function updateProduct(state, productId, patch) {
+  return Object.assign({}, state, {
+    products: state.products.map(function(p) {
+      if (p.id !== productId) return p;
+      return Object.assign({}, p, patch);
+    })
+  });
+}
+
+function deleteProduct(state, productId) {
+  return Object.assign({}, state, {
+    products: state.products.filter(function(p) { return p.id !== productId; }),
+    cart: Object.assign({}, state.cart, {
+      items: state.cart.items.filter(function(i) { return i.productId !== productId; })
+    })
+  });
+}
+
+function addToCart(cart, productId) {
+  var found = false;
+  var items = cart.items.map(function(item) {
+    if (item.productId === productId) {
+      found = true;
+      return { productId: productId, count: item.count + 1 };
+    }
+    return item;
+  });
+  if (!found) items = items.concat([{ productId: productId, count: 1 }]);
+  return Object.assign({}, cart, { items: items });
+}
+
+function decrementCartItem(cart, productId) {
+  var items = cart.items
+    .map(function(item) {
+      if (item.productId !== productId) return item;
+      return { productId: productId, count: item.count - 1 };
+    })
+    .filter(function(item) { return item.count > 0; });
+  return Object.assign({}, cart, { items: items });
+}
+
+function clearCart(cart) {
+  return Object.assign({}, cart, { items: [] });
+}
+
+function toggleTaxDisplay(cart) {
+  return Object.assign({}, cart, {
+    taxDisplayToggleState: cart.taxDisplayToggleState === 'including' ? 'excluding' : 'including'
+  });
+}
+
+function cartLineItems(cart, products) {
+  return cart.items.reduce(function(lines, item) {
+    var product = products.filter(function(p) { return p.id === item.productId; })[0];
+    if (!product) return lines;
+    lines.push({
+      productId: product.id,
+      name: product.name,
+      count: item.count,
+      subtotalExcludingTax: product.priceExcludingTax * item.count
+    });
+    return lines;
+  }, []);
+}
+
+function cartSubtotalExcludingTax(cart, products) {
+  return cartLineItems(cart, products).reduce(function(sum, line) { return sum + line.subtotalExcludingTax; }, 0);
+}
+
+function calcTaxIncludedTotal(subtotalExcludingTax, taxRatePercent) {
+  return Math.floor(subtotalExcludingTax * (1 + taxRatePercent / 100));
+}
+
+function resolveDisplayedTotal(cart, products, settings) {
+  var subtotal = cartSubtotalExcludingTax(cart, products);
+  if (settings.taxDisplayMode === 'alwaysIncluding') {
+    return { mode: 'including', amount: calcTaxIncludedTotal(subtotal, settings.taxRatePercent) };
+  }
+  if (settings.taxDisplayMode === 'alwaysExcluding') {
+    return { mode: 'excluding', amount: subtotal };
+  }
+  if (cart.taxDisplayToggleState === 'including') {
+    return { mode: 'including', amount: calcTaxIncludedTotal(subtotal, settings.taxRatePercent) };
+  }
+  return { mode: 'excluding', amount: subtotal };
+}
+
+function calcChange(receivedAmount, totalAmount) {
+  return receivedAmount - totalAmount;
+}
+
+function isSufficientPayment(receivedAmount, totalAmount) {
+  return receivedAmount >= totalAmount;
+}
+
+function recordCheckout(records, cart, products, settings, receivedAmount, recordedAt) {
+  var result = resolveDisplayedTotal(cart, products, settings);
+  var record = {
+    id: nextId(records),
+    recordedAt: recordedAt,
+    lines: cartLineItems(cart, products).map(function(line) {
+      return { name: line.name, count: line.count, subtotalExcludingTax: line.subtotalExcludingTax };
+    }),
+    totalMode: result.mode,
+    totalAmount: result.amount,
+    receivedAmount: receivedAmount,
+    changeAmount: calcChange(receivedAmount, result.amount)
+  };
+  return records.concat([record]);
+}
+
+function deleteRecords(records, idsToDelete) {
+  return records.filter(function(r) { return idsToDelete.indexOf(r.id) === -1; });
+}
+
+function formatDateTimeJa(date) {
+  var m = String(date.getMonth() + 1);
+  var d = String(date.getDate());
+  var hh = String(date.getHours()).padStart(2, '0');
+  var mm = String(date.getMinutes()).padStart(2, '0');
+  return m + '月' + d + '日 ' + hh + ':' + mm;
+}
+
+window.CoreLogic = {
+  COLOR_PALETTE: COLOR_PALETTE,
+  textColorForBackground: textColorForBackground,
+  nextId: nextId,
+  defaultState: defaultState,
+  serializeState: serializeState,
+  parseState: parseState,
+  serializeBackup: serializeBackup,
+  parseBackup: parseBackup,
+  addProduct: addProduct,
+  updateProduct: updateProduct,
+  deleteProduct: deleteProduct,
+  addToCart: addToCart,
+  decrementCartItem: decrementCartItem,
+  clearCart: clearCart,
+  toggleTaxDisplay: toggleTaxDisplay,
+  cartLineItems: cartLineItems,
+  cartSubtotalExcludingTax: cartSubtotalExcludingTax,
+  calcTaxIncludedTotal: calcTaxIncludedTotal,
+  resolveDisplayedTotal: resolveDisplayedTotal,
+  calcChange: calcChange,
+  isSufficientPayment: isSufficientPayment,
+  recordCheckout: recordCheckout,
+  deleteRecords: deleteRecords,
+  formatDateTimeJa: formatDateTimeJa
+};
+
+})();
+</script>
+
+<script id="app-ui">
+(function(){
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(function() {});
+  }
+
+  var STORAGE_KEY = 'settsu-regi-state';
+
+  var appState = loadState();
+  var editingProductId = null;
+  var selectedColorIndex = 0;
+
+  function loadState() {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return window.CoreLogic.defaultState();
+    try { return window.CoreLogic.parseState(raw); }
+    catch (e) { return window.CoreLogic.defaultState(); }
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, window.CoreLogic.serializeState(appState));
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(function(el) { el.style.display = 'none'; });
+    document.getElementById(id).style.display = 'block';
+  }
+
+  function renderProductGrid() {
+    var grid = document.getElementById('product-grid');
+    grid.innerHTML = '';
+    appState.products.forEach(function(product) {
+      var bg = window.CoreLogic.COLOR_PALETTE[product.colorIndex];
+      var fg = window.CoreLogic.textColorForBackground(bg);
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'product-btn';
+      btn.dataset.id = product.id;
+      btn.style.background = bg;
+      btn.style.color = fg;
+      var nameSpan = document.createElement('span');
+      nameSpan.textContent = product.name;
+      var priceSpan = document.createElement('span');
+      priceSpan.textContent = '￥' + product.priceExcludingTax;
+      btn.appendChild(nameSpan);
+      btn.appendChild(priceSpan);
+      grid.appendChild(btn);
+    });
+  }
+
+  function renderTotal() {
+    var result = window.CoreLogic.resolveDisplayedTotal(appState.cart, appState.products, appState.settings);
+    document.getElementById('cart-total-amount').textContent = '￥' + result.amount;
+    document.getElementById('cart-total-tax-label').innerHTML = result.mode === 'including'
+      ? '<ruby>税込<rt>ぜいこ</rt></ruby>み'
+      : '<ruby>税抜<rt>ぜいぬ</rt></ruby>き';
+    var toggleBtn = document.getElementById('tax-toggle-btn');
+    if (appState.settings.taxDisplayMode === 'toggle') {
+      toggleBtn.style.display = 'block';
+      toggleBtn.innerHTML = result.mode === 'including'
+        ? '<ruby>税抜<rt>ぜいぬ</rt></ruby>きで<ruby>表示<rt>ひょうじ</rt></ruby>する'
+        : '<ruby>税込<rt>ぜいこ</rt></ruby>みで<ruby>表示<rt>ひょうじ</rt></ruby>する';
+    } else {
+      toggleBtn.style.display = 'none';
+    }
+  }
+
+  function renderCart() {
+    var list = document.getElementById('cart-list');
+    list.innerHTML = '';
+    var lines = window.CoreLogic.cartLineItems(appState.cart, appState.products);
+    lines.forEach(function(line) {
+      var row = document.createElement('div');
+      row.className = 'cart-line';
+      var name = document.createElement('span');
+      name.className = 'cart-line-name';
+      name.textContent = line.name + ' × ' + line.count;
+      var amount = document.createElement('span');
+      amount.className = 'cart-line-amount';
+      amount.textContent = '￥' + line.subtotalExcludingTax;
+      var minusBtn = document.createElement('button');
+      minusBtn.type = 'button';
+      minusBtn.className = 'cart-line-minus';
+      minusBtn.dataset.id = line.productId;
+      minusBtn.textContent = '-1';
+      row.appendChild(name);
+      row.appendChild(amount);
+      row.appendChild(minusBtn);
+      list.appendChild(row);
+    });
+    renderTotal();
+  }
+
+  function goToRegister() {
+    renderProductGrid();
+    renderCart();
+    showScreen('screen-register');
+  }
+
+  function renderColorPalette() {
+    var palette = document.getElementById('color-palette');
+    palette.innerHTML = '';
+    window.CoreLogic.COLOR_PALETTE.forEach(function(hex, index) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'color-swatch' + (index === selectedColorIndex ? ' selected' : '');
+      btn.style.background = hex;
+      btn.dataset.index = index;
+      btn.addEventListener('click', function() {
+        selectedColorIndex = index;
+        renderColorPalette();
+      });
+      palette.appendChild(btn);
+    });
+  }
+
+  function renderProductForm() {
+    var saveBtn = document.getElementById('save-product-btn');
+    saveBtn.innerHTML = editingProductId === null
+      ? '<ruby>登録<rt>とうろく</rt></ruby>'
+      : '<ruby>更新<rt>こうしん</rt></ruby>';
+    document.getElementById('cancel-edit-btn').style.display = editingProductId === null ? 'none' : 'inline';
+  }
+
+  function renderProductList() {
+    var list = document.getElementById('product-list');
+    list.innerHTML = '';
+    appState.products.forEach(function(product) {
+      var li = document.createElement('li');
+      var swatch = document.createElement('span');
+      swatch.className = 'product-swatch-preview';
+      swatch.style.background = window.CoreLogic.COLOR_PALETTE[product.colorIndex];
+      var name = document.createElement('span');
+      name.className = 'product-list-name';
+      name.textContent = product.name + ' ￥' + product.priceExcludingTax;
+      var editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'link-btn';
+      editBtn.innerHTML = '<ruby>編集<rt>へんしゅう</rt></ruby>';
+      editBtn.addEventListener('click', function() { startEditProduct(product.id); });
+      var deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.className = 'link-btn';
+      deleteBtn.innerHTML = '<ruby>削除<rt>さくじょ</rt></ruby>';
+      deleteBtn.addEventListener('click', function() { handleDeleteProduct(product.id); });
+      li.appendChild(swatch);
+      li.appendChild(name);
+      li.appendChild(editBtn);
+      li.appendChild(deleteBtn);
+      list.appendChild(li);
+    });
+  }
+
+  function renderSettings() {
+    renderColorPalette();
+    renderProductList();
+    renderProductForm();
+    document.getElementById('tax-rate-input').value = appState.settings.taxRatePercent;
+    document.querySelectorAll('input[name="tax-display-mode"]').forEach(function(radio) {
+      radio.checked = radio.value === appState.settings.taxDisplayMode;
+    });
+  }
+
+  function clearProductForm() {
+    document.getElementById('product-name-input').value = '';
+    document.getElementById('product-price-input').value = '';
+    selectedColorIndex = 0;
+    editingProductId = null;
+  }
+
+  function startEditProduct(productId) {
+    var product = appState.products.filter(function(p) { return p.id === productId; })[0];
+    if (!product) return;
+    editingProductId = productId;
+    document.getElementById('product-name-input').value = product.name;
+    document.getElementById('product-price-input').value = product.priceExcludingTax;
+    selectedColorIndex = product.colorIndex;
+    renderSettings();
+  }
+
+  function handleDeleteProduct(productId) {
+    if (!confirm('この商品(しょうひん)を削除(さくじょ)しますか?')) return;
+    appState = window.CoreLogic.deleteProduct(appState, productId);
+    if (editingProductId === productId) clearProductForm();
+    saveState();
+    renderSettings();
+    renderProductGrid();
+    renderCart();
+  }
+
+  function goToSettings() {
+    renderSettings();
+    showScreen('screen-settings');
+  }
+
+  document.getElementById('save-product-btn').addEventListener('click', function() {
+    var name = document.getElementById('product-name-input').value.trim();
+    var price = parseInt(document.getElementById('product-price-input').value, 10);
+    if (!name || isNaN(price) || price < 0) return;
+    var input = { name: name, priceExcludingTax: price, colorIndex: selectedColorIndex };
+    if (editingProductId === null) {
+      appState = window.CoreLogic.addProduct(appState, input);
+    } else {
+      appState = window.CoreLogic.updateProduct(appState, editingProductId, input);
+    }
+    clearProductForm();
+    saveState();
+    renderSettings();
+    renderProductGrid();
+    renderCart();
+  });
+
+  document.getElementById('cancel-edit-btn').addEventListener('click', function() {
+    clearProductForm();
+    renderSettings();
+  });
+
+  document.getElementById('open-settings-from-register').addEventListener('click', goToSettings);
+  document.getElementById('back-to-register-btn').addEventListener('click', goToRegister);
+
+  document.getElementById('save-tax-rate-btn').addEventListener('click', function() {
+    var rate = parseInt(document.getElementById('tax-rate-input').value, 10);
+    if (isNaN(rate) || rate < 0) return;
+    appState = Object.assign({}, appState, {
+      settings: Object.assign({}, appState.settings, { taxRatePercent: rate })
+    });
+    saveState();
+    renderCart();
+  });
+
+  document.querySelectorAll('input[name="tax-display-mode"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      if (!radio.checked) return;
+      appState = Object.assign({}, appState, {
+        settings: Object.assign({}, appState.settings, { taxDisplayMode: radio.value })
+      });
+      saveState();
+      renderCart();
+    });
+  });
+
+  var audioCtx = null;
+  function ctx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+
+  function playTapSound() {
+    var c = ctx();
+    var o = c.createOscillator();
+    var g = c.createGain();
+    o.type = 'sine';
+    o.frequency.value = 880;
+    g.gain.setValueAtTime(0.0001, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.25, c.currentTime + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.12);
+    o.connect(g);
+    g.connect(c.destination);
+    o.start(c.currentTime);
+    o.stop(c.currentTime + 0.13);
+  }
+
+  document.getElementById('product-grid').addEventListener('click', function(e) {
+    var btn = e.target.closest('.product-btn');
+    if (!btn) return;
+    var productId = parseInt(btn.dataset.id, 10);
+    appState = Object.assign({}, appState, { cart: window.CoreLogic.addToCart(appState.cart, productId) });
+    saveState();
+    renderCart();
+    playTapSound();
+  });
+
+  function playDecrementSound() {
+    var c = ctx();
+    var o = c.createOscillator();
+    var g = c.createGain();
+    o.type = 'sine';
+    o.frequency.value = 220;
+    g.gain.setValueAtTime(0.0001, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.2, c.currentTime + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.15);
+    o.connect(g);
+    g.connect(c.destination);
+    o.start(c.currentTime);
+    o.stop(c.currentTime + 0.16);
+  }
+
+  document.getElementById('cart-list').addEventListener('click', function(e) {
+    var btn = e.target.closest('.cart-line-minus');
+    if (!btn) return;
+    var productId = parseInt(btn.dataset.id, 10);
+    appState = Object.assign({}, appState, { cart: window.CoreLogic.decrementCartItem(appState.cart, productId) });
+    saveState();
+    renderCart();
+    playDecrementSound();
+  });
+
+  document.getElementById('tax-toggle-btn').addEventListener('click', function() {
+    appState = Object.assign({}, appState, { cart: window.CoreLogic.toggleTaxDisplay(appState.cart) });
+    saveState();
+    renderCart();
+  });
+
+  function playCheckoutSound() {
+    var c = ctx();
+    [523.25, 659.25, 783.99].forEach(function(freq) {
+      var o = c.createOscillator();
+      var g = c.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq;
+      var t = c.currentTime;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.22, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+      o.connect(g);
+      g.connect(c.destination);
+      o.start(t);
+      o.stop(t + 0.5);
+    });
+  }
+
+  var receivedDigits = '';
+
+  function receivedAmount() {
+    return receivedDigits === '' ? 0 : parseInt(receivedDigits, 10);
+  }
+
+  function renderCheckout() {
+    var result = window.CoreLogic.resolveDisplayedTotal(appState.cart, appState.products, appState.settings);
+    document.getElementById('checkout-total-amount').textContent = '￥' + result.amount;
+    document.getElementById('checkout-total-tax-label').innerHTML = result.mode === 'including'
+      ? '<ruby>税込<rt>ぜいこ</rt></ruby>み'
+      : '<ruby>税抜<rt>ぜいぬ</rt></ruby>き';
+    var received = receivedAmount();
+    document.getElementById('received-amount-display').textContent = '￥' + received;
+
+    var sufficient = window.CoreLogic.isSufficientPayment(received, result.amount);
+    var changeRow = document.getElementById('change-row');
+    var confirmBtn = document.getElementById('confirm-checkout-btn');
+    if (sufficient) {
+      changeRow.innerHTML = 'お<ruby>釣<rt>つ</rt></ruby>り　￥' + window.CoreLogic.calcChange(received, result.amount);
+      changeRow.classList.remove('checkout-warning');
+      confirmBtn.disabled = false;
+    } else {
+      changeRow.innerHTML = '<ruby>金額<rt>きんがく</rt></ruby>が<ruby>足<rt>た</rt></ruby>りません';
+      changeRow.classList.add('checkout-warning');
+      confirmBtn.disabled = true;
+    }
+  }
+
+  function goToCheckout() {
+    if (appState.cart.items.length === 0) return;
+    receivedDigits = '';
+    renderCheckout();
+    showScreen('screen-checkout');
+  }
+
+  document.getElementById('checkout-btn').addEventListener('click', goToCheckout);
+  document.getElementById('cancel-checkout-btn').addEventListener('click', goToRegister);
+
+  document.getElementById('keypad').addEventListener('click', function(e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    if (btn.dataset.digit !== undefined) {
+      receivedDigits += btn.dataset.digit;
+    } else if (btn.id === 'keypad-backspace') {
+      receivedDigits = receivedDigits.slice(0, -1);
+    } else if (btn.id === 'keypad-clear') {
+      receivedDigits = '';
+    } else {
+      return;
+    }
+    renderCheckout();
+  });
+
+  document.getElementById('confirm-checkout-btn').addEventListener('click', function() {
+    var result = window.CoreLogic.resolveDisplayedTotal(appState.cart, appState.products, appState.settings);
+    var received = receivedAmount();
+    if (!window.CoreLogic.isSufficientPayment(received, result.amount)) return;
+    appState = Object.assign({}, appState, {
+      records: window.CoreLogic.recordCheckout(appState.records, appState.cart, appState.products, appState.settings, received, new Date().toISOString()),
+      cart: window.CoreLogic.clearCart(appState.cart)
+    });
+    saveState();
+    playCheckoutSound();
+    goToRegister();
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', function() {
+    appState = Object.assign({}, appState, { cart: window.CoreLogic.clearCart(appState.cart) });
+    saveState();
+    renderCart();
+  });
+
+  document.getElementById('export-backup-btn').addEventListener('click', function() {
+    var blob = new Blob([window.CoreLogic.serializeBackup(appState)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'settsu-regi-backup.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('import-backup-btn').addEventListener('click', function() {
+    document.getElementById('import-backup-input').click();
+  });
+
+  document.getElementById('import-backup-input').addEventListener('change', function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function() {
+      try {
+        var backup = window.CoreLogic.parseBackup(reader.result);
+        appState = Object.assign({}, appState, { products: backup.products, settings: backup.settings, records: backup.records });
+        saveState();
+        renderSettings();
+        renderProductGrid();
+        renderCart();
+      } catch (err) {
+        alert('ファイルを読み込めませんでした');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+  var selectedRecordIds = {};
+  var expandedRecordIds = {};
+
+  function updateDeleteRecordsButton() {
+    var anySelected = Object.keys(selectedRecordIds).some(function(id) { return selectedRecordIds[id]; });
+    document.getElementById('delete-selected-records-btn').disabled = !anySelected;
+  }
+
+  function renderRecords() {
+    var list = document.getElementById('records-list');
+    list.innerHTML = '';
+    var records = appState.records.slice().reverse();
+    if (records.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'records-empty';
+      empty.innerHTML = '<ruby>記録<rt>きろく</rt></ruby>はまだありません';
+      list.appendChild(empty);
+      updateDeleteRecordsButton();
+      return;
+    }
+    records.forEach(function(record) {
+      var row = document.createElement('div');
+      row.className = 'record-row';
+
+      var main = document.createElement('div');
+      main.className = 'record-row-main';
+
+      var checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'record-row-checkbox';
+      checkbox.checked = !!selectedRecordIds[record.id];
+      checkbox.addEventListener('click', function(e) { e.stopPropagation(); });
+      checkbox.addEventListener('change', function() {
+        selectedRecordIds[record.id] = checkbox.checked;
+        updateDeleteRecordsButton();
+      });
+
+      var datetime = document.createElement('span');
+      datetime.className = 'record-row-datetime';
+      datetime.textContent = window.CoreLogic.formatDateTimeJa(new Date(record.recordedAt));
+
+      var total = document.createElement('span');
+      total.className = 'record-row-total';
+      total.textContent = '￥' + record.totalAmount;
+
+      var received = document.createElement('span');
+      received.className = 'record-row-received';
+      received.textContent = 'もらった ￥' + record.receivedAmount;
+
+      var change = document.createElement('span');
+      change.className = 'record-row-change';
+      change.textContent = 'お釣り ￥' + record.changeAmount;
+
+      main.appendChild(checkbox);
+      main.appendChild(datetime);
+      main.appendChild(total);
+      main.appendChild(received);
+      main.appendChild(change);
+
+      var detail = document.createElement('div');
+      detail.className = 'record-detail' + (expandedRecordIds[record.id] ? ' expanded' : '');
+      record.lines.forEach(function(line) {
+        var lineRow = document.createElement('div');
+        lineRow.className = 'record-detail-line';
+        var lineName = document.createElement('span');
+        lineName.textContent = line.name + ' × ' + line.count;
+        var lineAmount = document.createElement('span');
+        lineAmount.textContent = '￥' + line.subtotalExcludingTax;
+        lineRow.appendChild(lineName);
+        lineRow.appendChild(lineAmount);
+        detail.appendChild(lineRow);
+      });
+
+      main.addEventListener('click', function() {
+        expandedRecordIds[record.id] = !expandedRecordIds[record.id];
+        detail.classList.toggle('expanded', !!expandedRecordIds[record.id]);
+      });
+
+      row.appendChild(main);
+      row.appendChild(detail);
+      list.appendChild(row);
+    });
+    updateDeleteRecordsButton();
+  }
+
+  function goToRecords() {
+    selectedRecordIds = {};
+    renderRecords();
+    showScreen('screen-records');
+  }
+
+  document.getElementById('open-records-from-register').addEventListener('click', goToRecords);
+  document.getElementById('back-to-register-from-records').addEventListener('click', goToRegister);
+
+  document.getElementById('delete-selected-records-btn').addEventListener('click', function() {
+    var idsToDelete = Object.keys(selectedRecordIds)
+      .filter(function(id) { return selectedRecordIds[id]; })
+      .map(function(id) { return parseInt(id, 10); });
+    if (idsToDelete.length === 0) return;
+    if (!confirm('選択(せんたく)した記録(きろく)を削除(さくじょ)しますか?')) return;
+    appState = Object.assign({}, appState, { records: window.CoreLogic.deleteRecords(appState.records, idsToDelete) });
+    saveState();
+    selectedRecordIds = {};
+    renderRecords();
+  });
+
+  goToRegister();
+})();
+</script>
+
+</body>
+</html>
