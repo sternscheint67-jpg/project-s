@@ -111,23 +111,26 @@ button:active { transform: scale(0.96); }
 .btn-primary { background:var(--accent); color:#fff; border:none; border-radius:var(--radius-md); padding:13px 0; font-size:16px; font-weight:700; cursor:pointer; }
 .btn-secondary { background:var(--fill-quiet); color:var(--text); border:none; border-radius:var(--radius-md); padding:13px 0; font-size:15px; font-weight:600; cursor:pointer; }
 
-.race-track { position:relative; height:70px; background:linear-gradient(#dff3ff,#eaf7ea); border-radius:var(--radius-md); overflow:hidden; margin-bottom:18px; box-shadow:inset 0 0 0 1px var(--hairline); }
-.race-runner { position:absolute; bottom:6px; font-size:30px; transition:left 220ms ease; }
-.race-runner.jump { animation:jumpUp 320ms ease; }
-@keyframes jumpUp { 30% { transform:translateY(-22px); } 100% { transform:translateY(0); } }
-.race-obstacle { position:absolute; bottom:6px; font-size:24px; }
-
-.word-card { background:var(--surface); border-radius:var(--radius-lg); padding:34px 24px; box-shadow:var(--shadow-card); text-align:center; margin-bottom:18px; }
-.word-display { font-size:52px; font-weight:700; letter-spacing:0.06em; min-height:64px; }
-.word-display .ch { transition:color 80ms ease; }
-.word-display .ch.done { color:var(--text-secondary); }
-.word-display .ch.current { color:var(--accent); }
-.word-display .ch.error-flash { color:var(--danger); }
-.word-hint { margin-top:10px; font-size:15px; color:var(--text-secondary); min-height:22px; }
-.word-next-hint { margin-top:16px; font-size:15px; font-weight:700; color:var(--success); min-height:22px; }
-
-.stats-row { display:flex; justify-content:center; gap:26px; margin-bottom:18px; font-size:14px; color:var(--text-secondary); }
+.stats-row { display:flex; justify-content:center; gap:26px; margin-bottom:14px; font-size:14px; color:var(--text-secondary); }
 .stats-row b { color:var(--text); font-variant-numeric:tabular-nums; font-size:16px; }
+
+.lanes-wrap { position:relative; margin-bottom:18px; }
+.lanes { position:relative; display:flex; height:420px; background:linear-gradient(#eaf6ff,#f5fbff); border-radius:var(--radius-lg); overflow:hidden; box-shadow:inset 0 0 0 1px var(--hairline); }
+.lane { flex:1; position:relative; }
+.lane:not(:last-child) { border-right:1px dashed var(--hairline); }
+.danger-line { position:absolute; left:0; right:0; bottom:34px; height:2px; background:var(--danger); opacity:0.45; pointer-events:none; }
+.octopus { position:absolute; left:50%; top:0; transform:translateX(-50%); text-align:center; white-space:nowrap; }
+.octopus.locked .octopus-emoji { filter:drop-shadow(0 0 7px rgba(0,113,227,0.75)); }
+.octopus-emoji { font-size:34px; line-height:1; }
+.octopus-word { font-size:18px; font-weight:700; margin-top:2px; }
+.octopus-word .ch { transition:color 80ms ease; }
+.octopus-word .ch.done { color:var(--text-secondary); }
+.octopus-word .ch.current { color:var(--accent); text-decoration:underline; }
+.octopus-word .ch.error-flash { color:var(--danger); }
+.octopus.defeated { animation:octoPopOut 220ms ease forwards; }
+@keyframes octoPopOut { to { transform:translateX(-50%) scale(1.6); opacity:0; } }
+.octopus.escaped { animation:octoSink 320ms ease forwards; }
+@keyframes octoSink { to { opacity:0; transform:translateX(-50%) translateY(14px); } }
 
 .level-list { display:flex; flex-direction:column; gap:14px; max-width:420px; margin:0 auto; }
 .level-btn {
@@ -153,7 +156,9 @@ button:active { transform: scale(0.96); }
   .practice-kana { font-size:64px; }
   .kb-key { min-width:30px; height:36px; font-size:12px; }
   .kb-key.space { min-width:140px; }
-  .word-display { font-size:38px; }
+  .lanes { height:340px; }
+  .octopus-emoji { font-size:26px; }
+  .octopus-word { font-size:14px; }
   .sentence-text { font-size:19px; line-height:1.9; }
 }
 </style>
@@ -207,19 +212,19 @@ button:active { transform: scale(0.96); }
     <h1><ruby>単語<rt>たんご</rt></ruby></h1>
     <span class="header-spacer"></span>
   </div>
-  <div class="instruction-card">「スペースキーで<ruby>再挑戦<rt>さいちょうせん</rt></ruby>しよう!」</div>
-  <div class="race-track" id="race-track">
-    <div class="race-runner" id="race-runner" style="left:2%">🐢</div>
-  </div>
+  <div class="instruction-card">タコが<ruby>下<rt>した</rt></ruby>に<ruby>着<rt>つ</rt></ruby>く<ruby>前<rt>まえ</rt></ruby>に、ローマ<ruby>字<rt>じ</rt></ruby>で<ruby>退治<rt>たいじ</rt></ruby>しよう!</div>
   <div class="stats-row">
-    <span>できた <b id="word-cleared-count">0</b></span>
-    <span>ミス <b id="word-miss-count">0</b></span>
-    <span>れんぞく <b id="word-streak-count">0</b></span>
+    <span>スコア <b id="word-score">0</b></span>
+    <span>たおした<ruby>数<rt>かず</rt></ruby> <b id="word-defeated-count">0</b></span>
+    <span><ruby>残<rt>のこ</rt></ruby>り <b id="word-lives">❤️❤️❤️</b></span>
   </div>
-  <div class="word-card">
-    <div id="word-display" class="word-display"></div>
-    <div id="word-hint" class="word-hint"></div>
-    <div id="word-next-hint" class="word-next-hint"></div>
+  <div class="lanes-wrap">
+    <div id="lanes" class="lanes">
+      <div class="lane" data-lane="0"></div>
+      <div class="lane" data-lane="1"></div>
+      <div class="lane" data-lane="2"></div>
+    </div>
+    <div class="danger-line"></div>
   </div>
 </div>
 
@@ -254,11 +259,7 @@ button:active { transform: scale(0.96); }
   <div class="result-card">
     <h2 id="result-title" style="text-align:center;"><ruby>評価<rt>ひょうか</rt></ruby></h2>
     <div id="result-grade" class="result-grade">S</div>
-    <div class="result-stats">
-      <span><ruby>速度<rt>そくど</rt></ruby>: <b id="result-cpm">0</b> <ruby>字<rt>じ</rt></ruby>/<ruby>分<rt>ぷん</rt></ruby></span>
-      <span><ruby>正確率<rt>せいかくりつ</rt></ruby>: <b id="result-accuracy">0</b>%</span>
-      <span><ruby>時間<rt>じかん</rt></ruby>: <b id="result-time">0</b><ruby>秒<rt>びょう</rt></ruby></span>
-    </div>
+    <div id="result-stats" class="result-stats"></div>
     <div class="result-actions">
       <button type="button" id="result-retry-btn" class="btn-primary">もう<ruby>一度<rt>いちど</rt></ruby></button>
       <button type="button" id="result-back-btn" class="btn-secondary"><ruby>戻<rt>もど</rt></ruby>る</button>
@@ -743,108 +744,210 @@ window.TypingCore = {
       loadPracticeKana();
     }
   }
+  function setResultStats(html) {
+    document.getElementById('result-stats').innerHTML = html;
+  }
   function showPracticeFinished() {
     document.getElementById('result-title').innerHTML = '<ruby>練習<rt>れんしゅう</rt></ruby><ruby>完了<rt>かんりょう</rt></ruby>!';
     document.getElementById('result-grade').textContent = '🎉';
-    document.getElementById('result-cpm').parentElement.parentElement.style.display = 'none';
+    setResultStats('');
     document.getElementById('result-overlay').hidden = false;
     resultRetryAction = function() { document.getElementById('result-overlay').hidden = true; startPractice(); };
     resultBackAction = function() { document.getElementById('result-overlay').hidden = true; goTo('screen-home'); };
   }
 
-  // ---- Word screen ----
-  var wordSession = null;
-  var wordCleared = 0, wordMiss = 0, wordStreak = 0;
-  var wordAwaitingNext = false;
+  // ---- Word screen: 3-lane falling octopus typing game ----
+  var LANE_COUNT = 3;
+  var START_LIVES = 3;
+  var wordActive = false;
+  var wordOctopi = [];
+  var wordLockedId = null;
+  var wordNextId = 1;
+  var wordLives = START_LIVES;
+  var wordScore = 0;
+  var wordDefeated = 0;
+  var wordStartTime = null;
   var wordKeyHandler = null;
-  var RACE_TRACK_LENGTH = 10;
+  var wordSpawnTimer = null;
+  var wordRAF = null;
+  var wordLastFrameTime = null;
 
   function startWord() {
-    wordCleared = 0; wordMiss = 0; wordStreak = 0;
+    wordActive = true;
+    wordOctopi = [];
+    wordLockedId = null;
+    wordNextId = 1;
+    wordLives = START_LIVES;
+    wordScore = 0;
+    wordDefeated = 0;
+    wordStartTime = Date.now();
+    document.querySelectorAll('#lanes .lane').forEach(function(lane) { lane.innerHTML = ''; });
     updateWordStats();
-    updateRaceTrack();
-    loadNewWord();
     wordKeyHandler = function(e) {
-      if (wordAwaitingNext) {
-        if (e.key === ' ') { e.preventDefault(); wordAwaitingNext = false; loadNewWord(); }
-        return;
-      }
-      if (/^[a-z]$/.test(e.key)) handleWordKeystroke(e.key);
+      if (!/^[a-z]$/.test(e.key)) return;
+      handleWordKeystroke(e.key);
     };
     document.addEventListener('keydown', wordKeyHandler);
+    spawnOctopus();
+    scheduleSpawn();
+    wordLastFrameTime = performance.now();
+    wordRAF = requestAnimationFrame(tickFall);
   }
   function stopWord() {
+    wordActive = false;
     if (wordKeyHandler) { document.removeEventListener('keydown', wordKeyHandler); wordKeyHandler = null; }
+    if (wordSpawnTimer) { clearTimeout(wordSpawnTimer); wordSpawnTimer = null; }
+    if (wordRAF) { cancelAnimationFrame(wordRAF); wordRAF = null; }
+    wordOctopi = [];
+    wordLockedId = null;
+    document.querySelectorAll('#lanes .lane').forEach(function(lane) { lane.innerHTML = ''; });
+  }
+  function heartsHtml(lives, total) {
+    var s = '';
+    for (var i = 0; i < total; i++) s += i < lives ? '❤️' : '🖤';
+    return s;
   }
   function updateWordStats() {
-    document.getElementById('word-cleared-count').textContent = wordCleared;
-    document.getElementById('word-miss-count').textContent = wordMiss;
-    document.getElementById('word-streak-count').textContent = wordStreak;
+    document.getElementById('word-score').textContent = wordScore;
+    document.getElementById('word-defeated-count').textContent = wordDefeated;
+    document.getElementById('word-lives').textContent = heartsHtml(wordLives, START_LIVES);
   }
-  function updateRaceTrack() {
-    var track = document.getElementById('race-track');
-    track.querySelectorAll('.race-obstacle').forEach(function(el) { el.remove(); });
-    for (var i = 1; i <= 3; i++) {
-      var obstacle = document.createElement('div');
-      obstacle.className = 'race-obstacle';
-      obstacle.textContent = '🚧';
-      obstacle.style.left = (i * 25) + '%';
-      track.appendChild(obstacle);
+  function scheduleSpawn() {
+    if (!wordActive) return;
+    var delay = Math.max(900, 2600 - wordDefeated * 40);
+    wordSpawnTimer = setTimeout(function() { spawnOctopus(); scheduleSpawn(); }, delay);
+  }
+  function pickLane() {
+    var candidates = [];
+    for (var l = 0; l < LANE_COUNT; l++) {
+      var crowded = wordOctopi.some(function(o) { return o.lane === l && o.y < 18; });
+      if (!crowded) candidates.push(l);
     }
-    var pos = (wordCleared % RACE_TRACK_LENGTH) / RACE_TRACK_LENGTH;
-    document.getElementById('race-runner').style.left = (2 + pos * 92) + '%';
+    if (!candidates.length) return -1;
+    return candidates[Math.floor(Math.random() * candidates.length)];
   }
-  function loadNewWord() {
-    wordSession = Core.createSession(Core.randomWord());
-    document.getElementById('word-next-hint').textContent = '';
-    renderWordDisplay();
+  function spawnOctopus() {
+    if (!wordActive) return;
+    var lane = pickLane();
+    if (lane === -1) return;
+    var word = Core.randomWord();
+    var octo = { id: wordNextId++, lane: lane, word: word, session: Core.createSession(word), y: 0, el: null };
+    wordOctopi.push(octo);
+    var laneEl = document.querySelector('.lane[data-lane="' + lane + '"]');
+    var el = document.createElement('div');
+    el.className = 'octopus';
+    el.innerHTML = '<div class="octopus-emoji">🐙</div><div class="octopus-word"></div>';
+    laneEl.appendChild(el);
+    octo.el = el;
+    renderOctopusWord(octo);
   }
-  function renderWordDisplay() {
-    var el = document.getElementById('word-display');
-    el.innerHTML = '';
-    wordSession.chunks.forEach(function(chunk, i) {
+  function renderOctopusWord(octo) {
+    var wordEl = octo.el.querySelector('.octopus-word');
+    wordEl.innerHTML = '';
+    octo.session.chunks.forEach(function(chunk, i) {
       var span = document.createElement('span');
-      span.className = 'ch' + (i < wordSession.index ? ' done' : i === wordSession.index ? ' current' : '');
+      span.className = 'ch' + (i < octo.session.index ? ' done' : i === octo.session.index ? ' current' : '');
       span.textContent = chunk.kana;
-      el.appendChild(span);
+      wordEl.appendChild(span);
     });
-    var currentChunk = wordSession.chunks[wordSession.index];
-    if (currentChunk) {
-      document.getElementById('word-hint').textContent = currentChunk.options[0];
-    }
+  }
+  function refreshLockedVisuals() {
+    wordOctopi.forEach(function(o) {
+      o.el.classList.toggle('locked', o.id === wordLockedId);
+    });
+  }
+  function removeOctopusEl(o) {
+    if (o.el && o.el.parentNode) o.el.parentNode.removeChild(o.el);
+  }
+  function defeatOctopus(o) {
+    wordOctopi = wordOctopi.filter(function(x) { return x.id !== o.id; });
+    if (wordLockedId === o.id) wordLockedId = null;
+    wordDefeated++;
+    wordScore += 10 + o.word.length * 3;
+    updateWordStats();
+    playComplete();
+    o.el.classList.add('defeated');
+    setTimeout(function() { removeOctopusEl(o); }, 240);
+  }
+  function escapeOctopus(o) {
+    wordOctopi = wordOctopi.filter(function(x) { return x.id !== o.id; });
+    if (wordLockedId === o.id) wordLockedId = null;
+    wordLives--;
+    updateWordStats();
+    playMistake();
+    o.el.classList.add('escaped');
+    setTimeout(function() { removeOctopusEl(o); }, 320);
+    if (wordLives <= 0) endWordGame();
+  }
+  function tickFall(now) {
+    if (!wordActive) return;
+    var dt = (now - wordLastFrameTime) / 1000;
+    wordLastFrameTime = now;
+    var speed = Math.min(22, 6 + wordDefeated * 0.15);
+    wordOctopi.slice().forEach(function(o) {
+      o.y += speed * dt;
+      if (o.y >= 92) {
+        escapeOctopus(o);
+      } else {
+        o.el.style.top = o.y + '%';
+      }
+    });
+    wordRAF = requestAnimationFrame(tickFall);
   }
   function handleWordKeystroke(letter) {
-    var res = Core.handleKey(wordSession, letter);
-    var spans = document.querySelectorAll('#word-display .ch');
-    if (res.result === 'miss') {
-      wordMiss++;
-      wordStreak = 0;
-      playMistake();
-      updateWordStats();
-      var errSpan = spans[wordSession.index];
-      if (errSpan) {
-        errSpan.classList.add('error-flash');
-        setTimeout(function() { errSpan.classList.remove('error-flash'); }, 200);
+    if (!wordActive) return;
+    if (wordLockedId !== null) {
+      var locked = wordOctopi.filter(function(o) { return o.id === wordLockedId; })[0];
+      if (!locked) {
+        wordLockedId = null;
+      } else {
+        var res = Core.handleKey(locked.session, letter);
+        if (res.result === 'miss') {
+          playMistake();
+          var errEl = locked.el.querySelector('.octopus-word .current');
+          if (errEl) {
+            errEl.classList.add('error-flash');
+            setTimeout(function() { errEl.classList.remove('error-flash'); }, 200);
+          }
+          return;
+        }
+        playCorrect();
+        renderOctopusWord(locked);
+        if (res.result === 'complete') defeatOctopus(locked);
+        return;
       }
-      return;
     }
+    var candidates = wordOctopi.filter(function(o) {
+      var chunk = o.session.chunks[o.session.index];
+      return chunk && chunk.options.some(function(opt) { return opt.indexOf(letter) === 0; });
+    });
+    if (!candidates.length) return;
+    candidates.sort(function(a, b) { return b.y - a.y; });
+    var target = candidates[0];
+    wordLockedId = target.id;
+    refreshLockedVisuals();
+    var res2 = Core.handleKey(target.session, letter);
     playCorrect();
-    if (res.result === 'complete') {
-      wordCleared++;
-      wordStreak++;
-      updateWordStats();
-      updateRaceTrack();
-      playComplete();
-      var runner = document.getElementById('race-runner');
-      runner.classList.add('jump');
-      setTimeout(function() { runner.classList.remove('jump'); }, 320);
-      renderWordDisplay();
-      document.getElementById('word-hint').textContent = '';
-      document.getElementById('word-next-hint').textContent = 'できた! スペースで つぎへ';
-      wordAwaitingNext = true;
-    } else {
-      renderWordDisplay();
+    renderOctopusWord(target);
+    if (res2.result === 'complete') defeatOctopus(target);
+  }
+  function endWordGame() {
+    stopWord();
+    var survivalSec = Math.round((Date.now() - wordStartTime) / 1000);
+    document.getElementById('result-title').innerHTML = '<ruby>単語<rt>たんご</rt></ruby>ゲーム しゅうりょう';
+    document.getElementById('result-grade').textContent = '🐙';
+    setResultStats(
+      '<span>たおした<ruby>数<rt>かず</rt></ruby>: <b>' + wordDefeated + '</b> <ruby>匹<rt>ひき</rt></ruby></span>' +
+      '<span>スコア: <b>' + wordScore + '</b></span>' +
+      '<span><ruby>生存<rt>せいぞん</rt></ruby><ruby>時間<rt>じかん</rt></ruby>: <b>' + survivalSec + '</b><ruby>秒<rt>びょう</rt></ruby></span>'
+    );
+    if (!bestGrades.wordScore || wordScore > bestGrades.wordScore) {
+      bestGrades.wordScore = wordScore;
+      saveBestGrades();
     }
+    document.getElementById('result-overlay').hidden = false;
+    resultRetryAction = function() { document.getElementById('result-overlay').hidden = true; goTo('screen-word'); startWord(); };
+    resultBackAction = function() { document.getElementById('result-overlay').hidden = true; goTo('screen-home'); };
   }
 
   // ---- Sentence levels ----
@@ -946,10 +1049,11 @@ window.TypingCore = {
     var grade = Core.gradeSession(sentenceSession);
     document.getElementById('result-title').innerHTML = sentenceLevel.label + ' <ruby>評価<rt>ひょうか</rt></ruby>';
     document.getElementById('result-grade').textContent = grade.grade;
-    document.getElementById('result-cpm').parentElement.parentElement.style.display = 'flex';
-    document.getElementById('result-cpm').textContent = grade.cpm;
-    document.getElementById('result-accuracy').textContent = grade.accuracy;
-    document.getElementById('result-time').textContent = grade.elapsedSec;
+    setResultStats(
+      '<span><ruby>速度<rt>そくど</rt></ruby>: <b>' + grade.cpm + '</b> <ruby>字<rt>じ</rt></ruby>/<ruby>分<rt>ぷん</rt></ruby></span>' +
+      '<span><ruby>正確率<rt>せいかくりつ</rt></ruby>: <b>' + grade.accuracy + '</b>%</span>' +
+      '<span><ruby>時間<rt>じかん</rt></ruby>: <b>' + grade.elapsedSec + '</b><ruby>秒<rt>びょう</rt></ruby></span>'
+    );
     var key = 'level' + sentenceLevel.id;
     var prevBest = bestGrades[key];
     if (!prevBest || GRADE_ORDER.indexOf(grade.grade) > GRADE_ORDER.indexOf(prevBest)) {
