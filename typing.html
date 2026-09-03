@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="タイピング練習">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>タイピング練習</title>
+<style>
+:root {
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --text: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --accent: #0071e3;
+  --success: #30b350;
+  --danger: #ff3b30;
+  --warning-text: #b9650a;
+  --hairline: rgba(0,0,0,0.08);
+  --fill-quiet: #e8e8ed;
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 10px 24px rgba(0,0,0,0.05);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 24px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.screen { max-width: 900px; margin: 0 auto; }
+
+h1 { text-align:center; font-size:26px; font-weight:700; letter-spacing:-0.01em; margin:8px 0 6px; }
+h2 { font-size:17px; font-weight:600; letter-spacing:-0.01em; margin:0 0 12px; }
+
+button { font-family: inherit; -webkit-tap-highlight-color: transparent; }
+button:active { transform: scale(0.96); }
+@media (prefers-reduced-motion: reduce) {
+  button:active { transform: none; }
+}
+
+.link-btn { background:none; border:none; color:var(--accent); font-size:15px; font-weight:500; cursor:pointer; padding:8px 4px; }
+.link-btn:active { opacity:0.5; transform:none; }
+
+.header-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.header-row h1 { flex:1; margin:0; }
+.header-spacer { width:64px; }
+
+.intro-text { text-align:center; color:var(--text-secondary); font-size:14px; margin:0 0 22px; }
+
+.menu-list { display:flex; flex-direction:column; gap:14px; max-width:360px; margin:0 auto; }
+.menu-btn {
+  background:var(--surface); border:none; border-radius:var(--radius-lg); padding:22px 20px;
+  font-size:22px; font-weight:700; letter-spacing:0.02em; color:var(--text); cursor:pointer;
+  box-shadow:var(--shadow-card); display:flex; align-items:center; justify-content:center; gap:10px;
+}
+.menu-btn .menu-icon { font-size:26px; }
+.menu-btn.practice { color:#2b6cb0; }
+.menu-btn.word { color:#276749; }
+.menu-btn.sentence { color:#b83280; }
+
+.settings-card { max-width:360px; margin:26px auto 0; background:var(--surface); border-radius:var(--radius-lg); padding:16px 20px; box-shadow:var(--shadow-card); }
+.settings-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; font-size:15px; }
+.toggle-btn { border:none; border-radius:20px; padding:6px 16px; font-size:13px; font-weight:700; cursor:pointer; min-width:60px; }
+.toggle-btn.on { background:var(--success); color:#fff; }
+.toggle-btn.off { background:var(--fill-quiet); color:var(--text-secondary); }
+
+.instruction-card { background:var(--surface); border-radius:var(--radius-lg); padding:16px 20px; box-shadow:var(--shadow-card); margin-bottom:18px; text-align:center; font-size:14px; line-height:1.9; color:var(--text-secondary); }
+
+.practice-stage { background:var(--surface); border-radius:var(--radius-lg); padding:26px; box-shadow:var(--shadow-card); text-align:center; margin-bottom:18px; }
+.practice-kana { font-size:88px; font-weight:700; line-height:1; margin-bottom:6px; transition:color 80ms ease; }
+.practice-kana.flash-ok { color:var(--success); }
+.practice-kana.flash-ng { color:var(--danger); }
+.practice-romaji { font-size:20px; letter-spacing:0.15em; color:var(--text-secondary); font-variant-numeric:tabular-nums; }
+.practice-rep-count { margin-top:10px; font-size:14px; color:var(--text-secondary); }
+.progress-track { height:8px; border-radius:4px; background:var(--fill-quiet); margin-top:16px; overflow:hidden; }
+.progress-fill { height:100%; background:var(--accent); border-radius:4px; transition:width 150ms ease; }
+
+.keyboard { max-width:620px; margin:0 auto; user-select:none; }
+.kb-row { display:flex; justify-content:center; gap:6px; margin-bottom:6px; }
+.kb-key {
+  min-width:44px; height:44px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+  font-size:15px; font-weight:700; color:#fff; opacity:0.55; transition:transform 80ms ease, opacity 80ms ease, box-shadow 80ms ease;
+}
+.kb-key.active { opacity:1; transform:scale(1.12); box-shadow:0 0 0 3px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.25); }
+.kb-key.space { min-width:220px; }
+.kb-f-lp { background:#e53e3e; } .kb-f-lr { background:#dd6b20; } .kb-f-lm { background:#d69e2e; } .kb-f-li { background:#38a169; }
+.kb-f-ri { background:#3182ce; } .kb-f-rm { background:#5a67d8; } .kb-f-rr { background:#805ad5; } .kb-f-rp { background:#d53f8c; }
+.kb-f-th { background:#718096; }
+.finger-legend { display:flex; flex-wrap:wrap; justify-content:center; gap:8px 14px; margin-top:16px; font-size:12px; color:var(--text-secondary); }
+.finger-legend span { display:inline-flex; align-items:center; gap:5px; }
+.finger-legend i { width:12px; height:12px; border-radius:3px; display:inline-block; }
+
+.result-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; padding:20px; z-index:20;
+}
+.result-overlay[hidden] { display:none; }
+.result-card { background:var(--surface); border-radius:var(--radius-lg); padding:30px 28px; max-width:340px; width:100%; text-align:center; box-shadow:var(--shadow-card); }
+.result-grade { font-size:64px; font-weight:800; margin:6px 0 14px; }
+.result-stats { display:flex; flex-direction:column; gap:8px; font-size:15px; color:var(--text-secondary); margin-bottom:20px; }
+.result-stats b { color:var(--text); font-variant-numeric:tabular-nums; }
+.result-actions { display:flex; flex-direction:column; gap:10px; }
+.btn-primary { background:var(--accent); color:#fff; border:none; border-radius:var(--radius-md); padding:13px 0; font-size:16px; font-weight:700; cursor:pointer; }
+.btn-secondary { background:var(--fill-quiet); color:var(--text); border:none; border-radius:var(--radius-md); padding:13px 0; font-size:15px; font-weight:600; cursor:pointer; }
+
+.race-track { position:relative; height:70px; background:linear-gradient(#dff3ff,#eaf7ea); border-radius:var(--radius-md); overflow:hidden; margin-bottom:18px; box-shadow:inset 0 0 0 1px var(--hairline); }
+.race-runner { position:absolute; bottom:6px; font-size:30px; transition:left 220ms ease; }
+.race-runner.jump { animation:jumpUp 320ms ease; }
+@keyframes jumpUp { 30% { transform:translateY(-22px); } 100% { transform:translateY(0); } }
+.race-obstacle { position:absolute; bottom:6px; font-size:24px; }
+
+.word-card { background:var(--surface); border-radius:var(--radius-lg); padding:34px 24px; box-shadow:var(--shadow-card); text-align:center; margin-bottom:18px; }
+.word-display { font-size:52px; font-weight:700; letter-spacing:0.06em; min-height:64px; }
+.word-display .ch { transition:color 80ms ease; }
+.word-display .ch.done { color:var(--text-secondary); }
+.word-display .ch.current { color:var(--accent); }
+.word-display .ch.error-flash { color:var(--danger); }
+.word-hint { margin-top:10px; font-size:15px; color:var(--text-secondary); min-height:22px; }
+.word-next-hint { margin-top:16px; font-size:15px; font-weight:700; color:var(--success); min-height:22px; }
+
+.stats-row { display:flex; justify-content:center; gap:26px; margin-bottom:18px; font-size:14px; color:var(--text-secondary); }
+.stats-row b { color:var(--text); font-variant-numeric:tabular-nums; font-size:16px; }
+
+.level-list { display:flex; flex-direction:column; gap:14px; max-width:420px; margin:0 auto; }
+.level-btn {
+  background:var(--surface); border:none; border-radius:var(--radius-lg); padding:18px 22px; text-align:left; cursor:pointer;
+  box-shadow:var(--shadow-card); display:flex; align-items:center; justify-content:space-between;
+}
+.level-btn-name { font-size:19px; font-weight:700; }
+.level-btn-sub { font-size:13px; color:var(--text-secondary); margin-top:4px; }
+.level-btn-best { font-size:22px; font-weight:800; color:var(--accent); }
+
+.sentence-timer-row { display:flex; justify-content:space-between; font-size:14px; color:var(--text-secondary); margin-bottom:10px; padding:0 4px; }
+.sentence-timer-row b { color:var(--text); font-variant-numeric:tabular-nums; }
+.sentence-card { background:var(--surface); border-radius:var(--radius-lg); padding:26px; box-shadow:var(--shadow-card); margin-bottom:18px; }
+.sentence-text { font-size:24px; line-height:2.1; letter-spacing:0.02em; word-break:break-all; }
+.sentence-text .ch { transition:color 80ms ease; }
+.sentence-text .ch.done { color:var(--text-secondary); }
+.sentence-text .ch.current { color:var(--accent); background:rgba(0,113,227,0.1); border-radius:4px; }
+.sentence-text .ch.error-flash { color:var(--danger); }
+.sentence-text .ch.punct { color:var(--text-secondary); }
+
+@media (max-width: 640px) {
+  body { padding:14px; }
+  .practice-kana { font-size:64px; }
+  .kb-key { min-width:30px; height:36px; font-size:12px; }
+  .kb-key.space { min-width:140px; }
+  .word-display { font-size:38px; }
+  .sentence-text { font-size:19px; line-height:1.9; }
+}
+</style>
+</head>
+<body>
+
+<div id="screen-home" class="screen">
+  <h1>タイピング<ruby>練習<rt>れんしゅう</rt></ruby></h1>
+  <p class="intro-text"><ruby>漢字<rt>かんじ</rt></ruby>には<ruby>全<rt>すべ</rt></ruby>てふりがなが<ruby>付<rt>つ</rt></ruby>いています</p>
+  <div class="menu-list">
+    <button type="button" class="menu-btn practice" data-mode="practice"><span class="menu-icon">⌨️</span><ruby>練習<rt>れんしゅう</rt></ruby></button>
+    <button type="button" class="menu-btn word" data-mode="word"><span class="menu-icon">🐢</span><ruby>単語<rt>たんご</rt></ruby></button>
+    <button type="button" class="menu-btn sentence" data-mode="sentence"><span class="menu-icon">📖</span><ruby>文章<rt>ぶんしょう</rt></ruby></button>
+  </div>
+  <div class="settings-card">
+    <h2 style="text-align:center;"><ruby>設定<rt>せってい</rt></ruby></h2>
+    <div class="settings-row">
+      <span>BGM</span>
+      <button type="button" id="bgm-toggle" class="toggle-btn"></button>
+    </div>
+    <div class="settings-row">
+      <span><ruby>効果音<rt>こうかおん</rt></ruby></span>
+      <button type="button" id="sfx-toggle" class="toggle-btn"></button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-practice" class="screen" style="display:none">
+  <div class="header-row">
+    <button type="button" class="link-btn back-btn" data-target="screen-home">← もどる</button>
+    <h1><ruby>練習<rt>れんしゅう</rt></ruby></h1>
+    <span class="header-spacer"></span>
+  </div>
+  <div class="instruction-card">
+    「<ruby>手元<rt>てもと</rt></ruby>を<ruby>見<rt>み</rt></ruby>ないで<ruby>打<rt>う</rt></ruby>とう!」<br>
+    「あ〜んまで、10<ruby>回<rt>かい</rt></ruby>ずつ<ruby>打<rt>う</rt></ruby>つ。<ruby>指<rt>ゆび</rt></ruby>の<ruby>確認<rt>かくにん</rt></ruby>も。」
+  </div>
+  <div class="practice-stage">
+    <div id="practice-kana" class="practice-kana">あ</div>
+    <div id="practice-romaji" class="practice-romaji">a</div>
+    <div id="practice-rep-count" class="practice-rep-count">1 / 10</div>
+    <div class="progress-track"><div id="practice-progress-fill" class="progress-fill" style="width:0%"></div></div>
+  </div>
+  <div id="practice-keyboard" class="keyboard"></div>
+  <div class="finger-legend" id="finger-legend"></div>
+</div>
+
+<div id="screen-word" class="screen" style="display:none">
+  <div class="header-row">
+    <button type="button" class="link-btn back-btn" data-target="screen-home">← もどる</button>
+    <h1><ruby>単語<rt>たんご</rt></ruby></h1>
+    <span class="header-spacer"></span>
+  </div>
+  <div class="instruction-card">「スペースキーで<ruby>再挑戦<rt>さいちょうせん</rt></ruby>しよう!」</div>
+  <div class="race-track" id="race-track">
+    <div class="race-runner" id="race-runner" style="left:2%">🐢</div>
+  </div>
+  <div class="stats-row">
+    <span>できた <b id="word-cleared-count">0</b></span>
+    <span>ミス <b id="word-miss-count">0</b></span>
+    <span>れんぞく <b id="word-streak-count">0</b></span>
+  </div>
+  <div class="word-card">
+    <div id="word-display" class="word-display"></div>
+    <div id="word-hint" class="word-hint"></div>
+    <div id="word-next-hint" class="word-next-hint"></div>
+  </div>
+</div>
+
+<div id="screen-sentence-levels" class="screen" style="display:none">
+  <div class="header-row">
+    <button type="button" class="link-btn back-btn" data-target="screen-home">← もどる</button>
+    <h1><ruby>文章<rt>ぶんしょう</rt></ruby></h1>
+    <span class="header-spacer"></span>
+  </div>
+  <div class="instruction-card">
+    <ruby>打<rt>う</rt></ruby>ち<ruby>終<rt>お</rt></ruby>わったら、グレーに<ruby>変<rt>か</rt></ruby>わる。<ruby>間違<rt>まちが</rt></ruby>いは<ruby>赤色<rt>あかいろ</rt></ruby>。
+  </div>
+  <div class="level-list" id="level-list"></div>
+</div>
+
+<div id="screen-sentence" class="screen" style="display:none">
+  <div class="header-row">
+    <button type="button" class="link-btn back-btn" data-target="screen-sentence-levels">← もどる</button>
+    <h1 id="sentence-level-title"><ruby>文章<rt>ぶんしょう</rt></ruby></h1>
+    <span class="header-spacer"></span>
+  </div>
+  <div class="sentence-timer-row">
+    <span><ruby>文字数<rt>もじすう</rt></ruby> <b id="sentence-progress-count">0</b> / <span id="sentence-total-count">0</span></span>
+    <span><ruby>時間<rt>じかん</rt></ruby> <b id="sentence-timer">0.0</b>秒</span>
+  </div>
+  <div class="sentence-card">
+    <div id="sentence-text" class="sentence-text"></div>
+  </div>
+</div>
+
+<div id="result-overlay" class="result-overlay" hidden>
+  <div class="result-card">
+    <h2 id="result-title" style="text-align:center;"><ruby>評価<rt>ひょうか</rt></ruby></h2>
+    <div id="result-grade" class="result-grade">S</div>
+    <div class="result-stats">
+      <span><ruby>速度<rt>そくど</rt></ruby>: <b id="result-cpm">0</b> <ruby>字<rt>じ</rt></ruby>/<ruby>分<rt>ぷん</rt></ruby></span>
+      <span><ruby>正確率<rt>せいかくりつ</rt></ruby>: <b id="result-accuracy">0</b>%</span>
+      <span><ruby>時間<rt>じかん</rt></ruby>: <b id="result-time">0</b><ruby>秒<rt>びょう</rt></ruby></span>
+    </div>
+    <div class="result-actions">
+      <button type="button" id="result-retry-btn" class="btn-primary">もう<ruby>一度<rt>いちど</rt></ruby></button>
+      <button type="button" id="result-back-btn" class="btn-secondary"><ruby>戻<rt>もど</rt></ruby>る</button>
+    </div>
+  </div>
+</div>
+
+<script id="core-logic">
+(function(){
+
+var ROMAJI_TABLE = {
+  'あ':['a'],'い':['i'],'う':['u'],'え':['e'],'お':['o'],
+  'か':['ka'],'き':['ki'],'く':['ku'],'け':['ke'],'こ':['ko'],
+  'さ':['sa'],'し':['shi','si'],'す':['su'],'せ':['se'],'そ':['so'],
+  'た':['ta'],'ち':['chi','ti'],'つ':['tsu','tu'],'て':['te'],'と':['to'],
+  'な':['na'],'に':['ni'],'ぬ':['nu'],'ね':['ne'],'の':['no'],
+  'は':['ha'],'ひ':['hi'],'ふ':['fu','hu'],'へ':['he'],'ほ':['ho'],
+  'ま':['ma'],'み':['mi'],'む':['mu'],'め':['me'],'も':['mo'],
+  'や':['ya'],'ゆ':['yu'],'よ':['yo'],
+  'ら':['ra'],'り':['ri'],'る':['ru'],'れ':['re'],'ろ':['ro'],
+  'わ':['wa'],'を':['wo'],'ん':['n','nn'],
+  'が':['ga'],'ぎ':['gi'],'ぐ':['gu'],'げ':['ge'],'ご':['go'],
+  'ざ':['za'],'じ':['ji','zi'],'ず':['zu'],'ぜ':['ze'],'ぞ':['zo'],
+  'だ':['da'],'ぢ':['ji','di'],'づ':['zu','du'],'で':['de'],'ど':['do'],
+  'ば':['ba'],'び':['bi'],'ぶ':['bu'],'べ':['be'],'ぼ':['bo'],
+  'ぱ':['pa'],'ぴ':['pi'],'ぷ':['pu'],'ぺ':['pe'],'ぽ':['po'],
+  'きゃ':['kya'],'きゅ':['kyu'],'きょ':['kyo'],
+  'しゃ':['sha','sya'],'しゅ':['shu','syu'],'しょ':['sho','syo'],
+  'ちゃ':['cha','tya'],'ちゅ':['chu','tyu'],'ちょ':['cho','tyo'],
+  'にゃ':['nya'],'にゅ':['nyu'],'にょ':['nyo'],
+  'ひゃ':['hya'],'ひゅ':['hyu'],'ひょ':['hyo'],
+  'みゃ':['mya'],'みゅ':['myu'],'みょ':['myo'],
+  'りゃ':['rya'],'りゅ':['ryu'],'りょ':['ryo'],
+  'ぎゃ':['gya'],'ぎゅ':['gyu'],'ぎょ':['gyo'],
+  'じゃ':['ja','zya'],'じゅ':['ju','zyu'],'じょ':['jo','zyo'],
+  'びゃ':['bya'],'びゅ':['byu'],'びょ':['byo'],
+  'ぴゃ':['pya'],'ぴゅ':['pyu'],'ぴょ':['pyo']
+};
+
+var YOUON_SMALL = ['ゃ','ゅ','ょ'];
+var PUNCTUATION = ['、','。','!','?','・','ー','\n'];
+
+var GOJUON = ['あ','い','う','え','お','か','き','く','け','こ','さ','し','す','せ','そ',
+  'た','ち','つ','て','と','な','に','ぬ','ね','の','は','ひ','ふ','へ','ほ',
+  'ま','み','む','め','も','や','ゆ','よ','ら','り','る','れ','ろ','わ','を','ん'];
+
+function buildChunks(text) {
+  var chars = Array.from(text);
+  var chunks = [];
+  var i = 0;
+  while (i < chars.length) {
+    var c = chars[i];
+    if (PUNCTUATION.indexOf(c) !== -1 || c === '　' || c === ' ') {
+      chunks.push({ kana: c, type: 'punct', options: [] });
+      i++;
+      continue;
+    }
+    if (c === 'っ') {
+      chunks.push({ kana: c, type: 'sokuon', options: null });
+      i++;
+      continue;
+    }
+    var two = chars[i + 1];
+    if (two && YOUON_SMALL.indexOf(two) !== -1 && ROMAJI_TABLE[c + two]) {
+      chunks.push({ kana: c + two, type: 'kana', options: ROMAJI_TABLE[c + two].slice() });
+      i += 2;
+      continue;
+    }
+    if (ROMAJI_TABLE[c]) {
+      chunks.push({ kana: c, type: 'kana', options: ROMAJI_TABLE[c].slice() });
+      i++;
+      continue;
+    }
+    chunks.push({ kana: c, type: 'punct', options: [] });
+    i++;
+  }
+  for (var idx = 0; idx < chunks.length; idx++) {
+    if (chunks[idx].type === 'sokuon') {
+      var next = chunks[idx + 1];
+      var consonant = 'q';
+      if (next && next.type === 'kana' && next.options.length) {
+        consonant = next.options[0].charAt(0);
+      }
+      chunks[idx].options = [consonant];
+    } else if (chunks[idx].type === 'kana' && chunks[idx].kana === 'ん') {
+      var next2 = chunks[idx + 1];
+      var needsNN = false;
+      if (next2 && next2.type === 'kana') {
+        var first = next2.options[0].charAt(0);
+        if ('aiueoyn'.indexOf(first) !== -1) needsNN = true;
+      }
+      chunks[idx].options = needsNN ? ['nn'] : ['n', 'nn'];
+    }
+  }
+  return chunks;
+}
+
+function skipPunct(session) {
+  while (session.index < session.chunks.length && session.chunks[session.index].type === 'punct') {
+    session.index++;
+  }
+  if (session.index >= session.chunks.length) session.finished = true;
+}
+
+function createSession(text) {
+  var session = { chunks: buildChunks(text), index: 0, buffer: '', mistakes: 0, startTime: null, endTime: null, finished: false };
+  skipPunct(session);
+  return session;
+}
+
+function handleKey(session, letter) {
+  if (session.finished) return { result: 'ignore' };
+  if (!session.startTime) session.startTime = Date.now();
+  var chunk = session.chunks[session.index];
+  var attempt = session.buffer + letter;
+  var anyPrefixMatch = chunk.options.some(function(opt) { return opt.indexOf(attempt) === 0; });
+  if (!anyPrefixMatch) {
+    session.mistakes++;
+    return { result: 'miss' };
+  }
+  session.buffer = attempt;
+  var isComplete = chunk.options.indexOf(attempt) !== -1;
+  if (isComplete) {
+    session.index++;
+    session.buffer = '';
+    skipPunct(session);
+    if (session.finished) {
+      session.endTime = Date.now();
+      return { result: 'complete' };
+    }
+    return { result: 'advance' };
+  }
+  return { result: 'partial' };
+}
+
+function gradeSession(session) {
+  var totalKana = session.chunks.filter(function(c) { return c.type === 'kana'; }).length;
+  var elapsedMs = Math.max((session.endTime || Date.now()) - session.startTime, 1);
+  var minutes = elapsedMs / 60000;
+  var cpm = totalKana / minutes;
+  var accuracy = totalKana > 0 ? totalKana / (totalKana + session.mistakes) : 1;
+  var score = cpm * accuracy;
+  var grade = score >= 300 ? 'S' : score >= 220 ? 'A' : score >= 150 ? 'B' : score >= 100 ? 'C' : score >= 60 ? 'D' : 'E';
+  return {
+    cpm: Math.round(cpm),
+    accuracy: Math.round(accuracy * 100),
+    grade: grade,
+    elapsedSec: Math.round(elapsedMs / 100) / 10,
+    mistakes: session.mistakes
+  };
+}
+
+var WORD_LIST = ['おかし','えがお','さいふ','ねこ','いぬ','つくえ','きって','でんわ','ほん','くるま',
+  'さくら','たまご','みかん','りんご','すいか','がっこう','せんせい','ともだち','おんがく','きょうしつ',
+  'ひこうき','でんしゃ','じてんしゃ','ゆうびん','としょかん','こうえん','びょういん','たいよう','つき','ほし',
+  'あめ','ゆき','かぜ','はな','とけい','かばん','めがね','しんぶん','にんじん','きゅうり'];
+
+function randomWord() {
+  return WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
+}
+
+var SENTENCE_POOL = [
+  'きょうはてんきがいいですね。',
+  'わたしはまいあささんぽをします。',
+  'ねこがまどのそとをみています。',
+  'としょかんでほんをかりました。',
+  'あしたはともだちとこうえんへいきます。',
+  'あさごはんにたまごやきをたべました。',
+  'でんしゃにのってがっこうへいきます。',
+  'にわにきれいなはながさいています。',
+  'よるははやくねるようにしています。',
+  'しゅくだいをおわらせてからあそびます。',
+  'あめのひはかさをもってでかけます。',
+  'としょしつでしずかにほんをよみます。',
+  'おかあさんといっしょにりょうりをしました。',
+  'なつやすみにうみへいくよていです。',
+  'あたらしいくつをかってもらいました。'
+];
+
+function shuffled(arr) {
+  var copy = arr.slice();
+  for (var i = copy.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = copy[i]; copy[i] = copy[j]; copy[j] = tmp;
+  }
+  return copy;
+}
+
+function kanaLength(text) {
+  return Array.from(text).filter(function(c) {
+    return PUNCTUATION.indexOf(c) === -1 && c !== '　' && c !== ' ';
+  }).length;
+}
+
+function buildLevelText(targetLength) {
+  var pool = shuffled(SENTENCE_POOL);
+  var result = '';
+  var count = 0;
+  var i = 0;
+  while (count < targetLength) {
+    var s = pool[i % pool.length];
+    result += s;
+    count += kanaLength(s);
+    i++;
+    if (i > pool.length * 4) break;
+  }
+  return result;
+}
+
+var LEVELS = [
+  { id: 1, label: 'レベル1', length: 50 },
+  { id: 2, label: 'レベル2', length: 100 },
+  { id: 3, label: 'レベル3', length: 300 }
+];
+
+var FINGER_MAP = {
+  q:'lp', w:'lr', e:'lm', r:'li', t:'li', y:'ri', u:'ri', i:'rm', o:'rr', p:'rp',
+  a:'lp', s:'lr', d:'lm', f:'li', g:'li', h:'ri', j:'ri', k:'rm', l:'rr',
+  z:'lp', x:'lr', c:'lm', v:'li', b:'li', n:'ri', m:'ri',
+  ' ':'th'
+};
+
+var KEYBOARD_ROWS = [
+  ['q','w','e','r','t','y','u','i','o','p'],
+  ['a','s','d','f','g','h','j','k','l'],
+  ['z','x','c','v','b','n','m'],
+  [' ']
+];
+
+var FINGER_LABELS = [
+  { cls:'lp', name:'ひだり小指' }, { cls:'lr', name:'ひだり薬指' }, { cls:'lm', name:'ひだり中指' }, { cls:'li', name:'ひだり人差し指' },
+  { cls:'ri', name:'みぎ人差し指' }, { cls:'rm', name:'みぎ中指' }, { cls:'rr', name:'みぎ薬指' }, { cls:'rp', name:'みぎ小指' }
+];
+
+window.TypingCore = {
+  ROMAJI_TABLE: ROMAJI_TABLE,
+  GOJUON: GOJUON,
+  buildChunks: buildChunks,
+  createSession: createSession,
+  handleKey: handleKey,
+  gradeSession: gradeSession,
+  WORD_LIST: WORD_LIST,
+  randomWord: randomWord,
+  SENTENCE_POOL: SENTENCE_POOL,
+  kanaLength: kanaLength,
+  buildLevelText: buildLevelText,
+  LEVELS: LEVELS,
+  FINGER_MAP: FINGER_MAP,
+  KEYBOARD_ROWS: KEYBOARD_ROWS,
+  FINGER_LABELS: FINGER_LABELS
+};
+
+})();
+</script>
+
+<script id="app-ui">
+(function(){
+  var Core = window.TypingCore;
+  var STORAGE_KEY = 'typing-app-settings';
+  var BEST_KEY = 'typing-app-best-grades';
+  var GRADE_ORDER = ['E','D','C','B','A','S'];
+
+  var settings = loadSettings();
+  var bestGrades = loadBestGrades();
+
+  function loadSettings() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { bgmOn: true, sfxOn: true };
+      var parsed = JSON.parse(raw);
+      return { bgmOn: parsed.bgmOn !== false, sfxOn: parsed.sfxOn !== false };
+    } catch (e) { return { bgmOn: true, sfxOn: true }; }
+  }
+  function saveSettings() { localStorage.setItem(STORAGE_KEY, JSON.stringify(settings)); }
+
+  function loadBestGrades() {
+    try {
+      var raw = localStorage.getItem(BEST_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+  function saveBestGrades() { localStorage.setItem(BEST_KEY, JSON.stringify(bestGrades)); }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(function(el) { el.style.display = 'none'; });
+    document.getElementById(id).style.display = 'block';
+  }
+
+  var audioCtx = null;
+  function ctx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+  function playTone(freq, peak, durationMs, type) {
+    var c = ctx();
+    var o = c.createOscillator();
+    var g = c.createGain();
+    o.type = type || 'sine';
+    o.frequency.value = freq;
+    var t = c.currentTime;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + durationMs / 1000);
+    o.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t + durationMs / 1000 + 0.02);
+  }
+  function playCorrect() { if (settings.sfxOn) playTone(880, 0.18, 90); }
+  function playMistake() { if (settings.sfxOn) playTone(160, 0.2, 140, 'square'); }
+  function playComplete() {
+    if (!settings.sfxOn) return;
+    [523.25, 659.25, 783.99, 1046.5].forEach(function(freq, i) {
+      setTimeout(function() { playTone(freq, 0.2, 220); }, i * 90);
+    });
+  }
+  function playClick() { if (settings.sfxOn) playTone(600, 0.12, 60); }
+
+  var BGM_PATTERNS = {
+    'screen-home': { notes: [261.63, 329.63, 392.00, 329.63], tempo: 650 },
+    'screen-practice': { notes: [293.66, 349.23, 440.00, 349.23], tempo: 500 },
+    'screen-word': { notes: [329.63, 392.00, 493.88, 392.00], tempo: 340 },
+    'screen-sentence-levels': { notes: [261.63, 329.63, 392.00, 329.63], tempo: 650 },
+    'screen-sentence': { notes: [246.94, 293.66, 349.23, 293.66], tempo: 560 }
+  };
+  var bgmTimer = null;
+  var bgmIndex = 0;
+  function stopBGM() { if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; } }
+  function startBGM(screenId) {
+    stopBGM();
+    if (!settings.bgmOn) return;
+    var pattern = BGM_PATTERNS[screenId];
+    if (!pattern) return;
+    bgmIndex = 0;
+    bgmTimer = setInterval(function() {
+      playTone(pattern.notes[bgmIndex % pattern.notes.length], 0.05, pattern.tempo * 0.75);
+      bgmIndex++;
+    }, pattern.tempo);
+  }
+
+  function renderSettingsToggles() {
+    var bgmBtn = document.getElementById('bgm-toggle');
+    var sfxBtn = document.getElementById('sfx-toggle');
+    bgmBtn.textContent = settings.bgmOn ? 'ON' : 'OFF';
+    bgmBtn.className = 'toggle-btn ' + (settings.bgmOn ? 'on' : 'off');
+    sfxBtn.textContent = settings.sfxOn ? 'ON' : 'OFF';
+    sfxBtn.className = 'toggle-btn ' + (settings.sfxOn ? 'on' : 'off');
+  }
+  renderSettingsToggles();
+
+  document.getElementById('bgm-toggle').addEventListener('click', function() {
+    settings.bgmOn = !settings.bgmOn;
+    saveSettings();
+    renderSettingsToggles();
+    startBGM('screen-home');
+  });
+  document.getElementById('sfx-toggle').addEventListener('click', function() {
+    settings.sfxOn = !settings.sfxOn;
+    saveSettings();
+    renderSettingsToggles();
+    playClick();
+  });
+
+  document.querySelectorAll('.back-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      playClick();
+      goTo(btn.dataset.target);
+    });
+  });
+
+  function goTo(screenId) {
+    stopPractice();
+    stopWord();
+    stopSentence();
+    showScreen(screenId);
+    startBGM(screenId);
+    if (screenId === 'screen-sentence-levels') renderLevelList();
+  }
+
+  document.querySelectorAll('.menu-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      playClick();
+      var mode = btn.dataset.mode;
+      if (mode === 'practice') { goTo('screen-practice'); startPractice(); }
+      else if (mode === 'word') { goTo('screen-word'); startWord(); }
+      else if (mode === 'sentence') { goTo('screen-sentence-levels'); }
+    });
+  });
+
+  // ---- Keyboard (shared render, used by practice screen) ----
+  function renderKeyboard(container) {
+    container.innerHTML = '';
+    Core.KEYBOARD_ROWS.forEach(function(row) {
+      var rowEl = document.createElement('div');
+      rowEl.className = 'kb-row';
+      row.forEach(function(key) {
+        var keyEl = document.createElement('div');
+        var finger = Core.FINGER_MAP[key];
+        keyEl.className = 'kb-key kb-f-' + finger + (key === ' ' ? ' space' : '');
+        keyEl.dataset.key = key;
+        keyEl.textContent = key === ' ' ? 'space' : key;
+        rowEl.appendChild(keyEl);
+      });
+      container.appendChild(rowEl);
+    });
+  }
+  function highlightKey(container, letter) {
+    container.querySelectorAll('.kb-key').forEach(function(el) {
+      el.classList.toggle('active', el.dataset.key === letter);
+    });
+  }
+  function renderFingerLegend() {
+    var legend = document.getElementById('finger-legend');
+    legend.innerHTML = '';
+    Core.FINGER_LABELS.forEach(function(f) {
+      var span = document.createElement('span');
+      var i = document.createElement('i');
+      i.className = 'kb-f-' + f.cls;
+      span.appendChild(i);
+      span.appendChild(document.createTextNode(f.name));
+      legend.appendChild(span);
+    });
+  }
+  renderFingerLegend();
+
+  // ---- Practice screen ----
+  var practiceKanaIndex = 0;
+  var practiceReps = 0;
+  var practiceSession = null;
+  var practiceKeyHandler = null;
+  var PRACTICE_TARGET_REPS = 10;
+
+  function currentPracticeKana() { return Core.GOJUON[practiceKanaIndex]; }
+
+  function startPractice() {
+    practiceKanaIndex = 0;
+    practiceReps = 0;
+    renderKeyboard(document.getElementById('practice-keyboard'));
+    loadPracticeKana();
+    practiceKeyHandler = function(e) {
+      if (!/^[a-z]$/.test(e.key)) return;
+      handlePracticeKeystroke(e.key);
+    };
+    document.addEventListener('keydown', practiceKeyHandler);
+  }
+  function stopPractice() {
+    if (practiceKeyHandler) { document.removeEventListener('keydown', practiceKeyHandler); practiceKeyHandler = null; }
+  }
+  function loadPracticeKana() {
+    practiceSession = Core.createSession(currentPracticeKana());
+    document.getElementById('practice-kana').textContent = currentPracticeKana();
+    document.getElementById('practice-romaji').textContent = practiceSession.chunks[0].options[0];
+    document.getElementById('practice-rep-count').textContent = (practiceReps + 1) + ' / ' + PRACTICE_TARGET_REPS;
+    document.getElementById('practice-progress-fill').style.width = Math.round((practiceKanaIndex / Core.GOJUON.length) * 100) + '%';
+    highlightKey(document.getElementById('practice-keyboard'), practiceSession.chunks[0].options[0].charAt(0));
+  }
+  function handlePracticeKeystroke(letter) {
+    var kanaEl = document.getElementById('practice-kana');
+    var res = Core.handleKey(practiceSession, letter);
+    if (res.result === 'miss') {
+      playMistake();
+      kanaEl.classList.remove('flash-ok'); kanaEl.classList.add('flash-ng');
+      setTimeout(function() { kanaEl.classList.remove('flash-ng'); }, 150);
+      return;
+    }
+    playCorrect();
+    kanaEl.classList.remove('flash-ng'); kanaEl.classList.add('flash-ok');
+    setTimeout(function() { kanaEl.classList.remove('flash-ok'); }, 150);
+    var chunk = practiceSession.chunks[0];
+    var remaining = chunk.options[0].slice(practiceSession.buffer.length);
+    highlightKey(document.getElementById('practice-keyboard'), remaining.charAt(0) || '');
+    if (res.result === 'complete') {
+      practiceReps++;
+      if (practiceReps >= PRACTICE_TARGET_REPS) {
+        practiceReps = 0;
+        practiceKanaIndex++;
+        if (practiceKanaIndex >= Core.GOJUON.length) {
+          playComplete();
+          stopPractice();
+          showPracticeFinished();
+          return;
+        }
+      }
+      loadPracticeKana();
+    }
+  }
+  function showPracticeFinished() {
+    document.getElementById('result-title').innerHTML = '<ruby>練習<rt>れんしゅう</rt></ruby><ruby>完了<rt>かんりょう</rt></ruby>!';
+    document.getElementById('result-grade').textContent = '🎉';
+    document.getElementById('result-cpm').parentElement.parentElement.style.display = 'none';
+    document.getElementById('result-overlay').hidden = false;
+    resultRetryAction = function() { document.getElementById('result-overlay').hidden = true; startPractice(); };
+    resultBackAction = function() { document.getElementById('result-overlay').hidden = true; goTo('screen-home'); };
+  }
+
+  // ---- Word screen ----
+  var wordSession = null;
+  var wordCleared = 0, wordMiss = 0, wordStreak = 0;
+  var wordAwaitingNext = false;
+  var wordKeyHandler = null;
+  var RACE_TRACK_LENGTH = 10;
+
+  function startWord() {
+    wordCleared = 0; wordMiss = 0; wordStreak = 0;
+    updateWordStats();
+    updateRaceTrack();
+    loadNewWord();
+    wordKeyHandler = function(e) {
+      if (wordAwaitingNext) {
+        if (e.key === ' ') { e.preventDefault(); wordAwaitingNext = false; loadNewWord(); }
+        return;
+      }
+      if (/^[a-z]$/.test(e.key)) handleWordKeystroke(e.key);
+    };
+    document.addEventListener('keydown', wordKeyHandler);
+  }
+  function stopWord() {
+    if (wordKeyHandler) { document.removeEventListener('keydown', wordKeyHandler); wordKeyHandler = null; }
+  }
+  function updateWordStats() {
+    document.getElementById('word-cleared-count').textContent = wordCleared;
+    document.getElementById('word-miss-count').textContent = wordMiss;
+    document.getElementById('word-streak-count').textContent = wordStreak;
+  }
+  function updateRaceTrack() {
+    var track = document.getElementById('race-track');
+    track.querySelectorAll('.race-obstacle').forEach(function(el) { el.remove(); });
+    for (var i = 1; i <= 3; i++) {
+      var obstacle = document.createElement('div');
+      obstacle.className = 'race-obstacle';
+      obstacle.textContent = '🚧';
+      obstacle.style.left = (i * 25) + '%';
+      track.appendChild(obstacle);
+    }
+    var pos = (wordCleared % RACE_TRACK_LENGTH) / RACE_TRACK_LENGTH;
+    document.getElementById('race-runner').style.left = (2 + pos * 92) + '%';
+  }
+  function loadNewWord() {
+    wordSession = Core.createSession(Core.randomWord());
+    document.getElementById('word-next-hint').textContent = '';
+    renderWordDisplay();
+  }
+  function renderWordDisplay() {
+    var el = document.getElementById('word-display');
+    el.innerHTML = '';
+    wordSession.chunks.forEach(function(chunk, i) {
+      var span = document.createElement('span');
+      span.className = 'ch' + (i < wordSession.index ? ' done' : i === wordSession.index ? ' current' : '');
+      span.textContent = chunk.kana;
+      el.appendChild(span);
+    });
+    var currentChunk = wordSession.chunks[wordSession.index];
+    if (currentChunk) {
+      document.getElementById('word-hint').textContent = currentChunk.options[0];
+    }
+  }
+  function handleWordKeystroke(letter) {
+    var res = Core.handleKey(wordSession, letter);
+    var spans = document.querySelectorAll('#word-display .ch');
+    if (res.result === 'miss') {
+      wordMiss++;
+      wordStreak = 0;
+      playMistake();
+      updateWordStats();
+      var errSpan = spans[wordSession.index];
+      if (errSpan) {
+        errSpan.classList.add('error-flash');
+        setTimeout(function() { errSpan.classList.remove('error-flash'); }, 200);
+      }
+      return;
+    }
+    playCorrect();
+    if (res.result === 'complete') {
+      wordCleared++;
+      wordStreak++;
+      updateWordStats();
+      updateRaceTrack();
+      playComplete();
+      var runner = document.getElementById('race-runner');
+      runner.classList.add('jump');
+      setTimeout(function() { runner.classList.remove('jump'); }, 320);
+      renderWordDisplay();
+      document.getElementById('word-hint').textContent = '';
+      document.getElementById('word-next-hint').textContent = 'できた! スペースで つぎへ';
+      wordAwaitingNext = true;
+    } else {
+      renderWordDisplay();
+    }
+  }
+
+  // ---- Sentence levels ----
+  function bestGradeLabel(levelId) {
+    return bestGrades['level' + levelId] || '-';
+  }
+  function renderLevelList() {
+    var list = document.getElementById('level-list');
+    list.innerHTML = '';
+    Core.LEVELS.forEach(function(level) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'level-btn';
+      var left = document.createElement('div');
+      left.innerHTML = '<div class="level-btn-name">' + level.label + '</div><div class="level-btn-sub">' + level.length + '<ruby>文字<rt>もじ</rt></ruby></div>';
+      var right = document.createElement('div');
+      right.className = 'level-btn-best';
+      right.textContent = bestGradeLabel(level.id);
+      btn.appendChild(left);
+      btn.appendChild(right);
+      btn.addEventListener('click', function() {
+        playClick();
+        goTo('screen-sentence');
+        startSentence(level);
+      });
+      list.appendChild(btn);
+    });
+  }
+
+  // ---- Sentence typing ----
+  var sentenceSession = null;
+  var sentenceLevel = null;
+  var sentenceKeyHandler = null;
+  var sentenceTimerInterval = null;
+
+  function startSentence(level) {
+    sentenceLevel = level;
+    document.getElementById('sentence-level-title').innerHTML = level.label;
+    var text = Core.buildLevelText(level.length);
+    sentenceSession = Core.createSession(text);
+    var totalKana = sentenceSession.chunks.filter(function(c) { return c.type === 'kana'; }).length;
+    document.getElementById('sentence-total-count').textContent = totalKana;
+    document.getElementById('sentence-progress-count').textContent = 0;
+    document.getElementById('sentence-timer').textContent = '0.0';
+    renderSentenceDisplay();
+    sentenceKeyHandler = function(e) {
+      if (!/^[a-z]$/.test(e.key)) return;
+      handleSentenceKeystroke(e.key);
+    };
+    document.addEventListener('keydown', sentenceKeyHandler);
+    sentenceTimerInterval = setInterval(updateSentenceTimer, 100);
+  }
+  function stopSentence() {
+    if (sentenceKeyHandler) { document.removeEventListener('keydown', sentenceKeyHandler); sentenceKeyHandler = null; }
+    if (sentenceTimerInterval) { clearInterval(sentenceTimerInterval); sentenceTimerInterval = null; }
+  }
+  function updateSentenceTimer() {
+    if (!sentenceSession || !sentenceSession.startTime) return;
+    var elapsed = (Date.now() - sentenceSession.startTime) / 1000;
+    document.getElementById('sentence-timer').textContent = elapsed.toFixed(1);
+  }
+  function renderSentenceDisplay() {
+    var el = document.getElementById('sentence-text');
+    el.innerHTML = '';
+    var doneKana = 0;
+    sentenceSession.chunks.forEach(function(chunk, i) {
+      var span = document.createElement('span');
+      var cls = 'ch';
+      if (chunk.type === 'punct') cls += ' punct';
+      if (i < sentenceSession.index) { cls += ' done'; if (chunk.type === 'kana') doneKana++; }
+      else if (i === sentenceSession.index) cls += ' current';
+      span.className = cls;
+      span.textContent = chunk.kana;
+      el.appendChild(span);
+    });
+    document.getElementById('sentence-progress-count').textContent = doneKana;
+  }
+  function handleSentenceKeystroke(letter) {
+    var res = Core.handleKey(sentenceSession, letter);
+    var spans = document.querySelectorAll('#sentence-text .ch');
+    if (res.result === 'miss') {
+      playMistake();
+      var errSpan = spans[sentenceSession.index];
+      if (errSpan) {
+        errSpan.classList.add('error-flash');
+        setTimeout(function() { errSpan.classList.remove('error-flash'); }, 200);
+      }
+      return;
+    }
+    playCorrect();
+    renderSentenceDisplay();
+    if (res.result === 'complete') {
+      stopSentence();
+      playComplete();
+      showSentenceResult();
+    }
+  }
+  function showSentenceResult() {
+    var grade = Core.gradeSession(sentenceSession);
+    document.getElementById('result-title').innerHTML = sentenceLevel.label + ' <ruby>評価<rt>ひょうか</rt></ruby>';
+    document.getElementById('result-grade').textContent = grade.grade;
+    document.getElementById('result-cpm').parentElement.parentElement.style.display = 'flex';
+    document.getElementById('result-cpm').textContent = grade.cpm;
+    document.getElementById('result-accuracy').textContent = grade.accuracy;
+    document.getElementById('result-time').textContent = grade.elapsedSec;
+    var key = 'level' + sentenceLevel.id;
+    var prevBest = bestGrades[key];
+    if (!prevBest || GRADE_ORDER.indexOf(grade.grade) > GRADE_ORDER.indexOf(prevBest)) {
+      bestGrades[key] = grade.grade;
+      saveBestGrades();
+    }
+    document.getElementById('result-overlay').hidden = false;
+    resultRetryAction = function() { document.getElementById('result-overlay').hidden = true; goTo('screen-sentence'); startSentence(sentenceLevel); };
+    resultBackAction = function() { document.getElementById('result-overlay').hidden = true; goTo('screen-sentence-levels'); };
+  }
+
+  var resultRetryAction = null;
+  var resultBackAction = null;
+  document.getElementById('result-retry-btn').addEventListener('click', function() {
+    playClick();
+    if (resultRetryAction) resultRetryAction();
+  });
+  document.getElementById('result-back-btn').addEventListener('click', function() {
+    playClick();
+    if (resultBackAction) resultBackAction();
+  });
+
+  startBGM('screen-home');
+})();
+</script>
+
+</body>
+</html>
