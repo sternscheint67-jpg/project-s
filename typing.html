@@ -293,14 +293,14 @@ button:active { transform: scale(0.96); }
 var ROMAJI_TABLE = {
   'あ':['a'],'い':['i'],'う':['u'],'え':['e'],'お':['o'],
   'か':['ka'],'き':['ki'],'く':['ku'],'け':['ke'],'こ':['ko'],
-  'さ':['sa'],'し':['shi','si'],'す':['su'],'せ':['se'],'そ':['so'],
-  'た':['ta'],'ち':['chi','ti'],'つ':['tsu','tu'],'て':['te'],'と':['to'],
+  'さ':['sa'],'し':['si','shi'],'す':['su'],'せ':['se'],'そ':['so'],
+  'た':['ta'],'ち':['ti','chi'],'つ':['tu','tsu'],'て':['te'],'と':['to'],
   'な':['na'],'に':['ni'],'ぬ':['nu'],'ね':['ne'],'の':['no'],
-  'は':['ha'],'ひ':['hi'],'ふ':['fu','hu'],'へ':['he'],'ほ':['ho'],
+  'は':['ha'],'ひ':['hi'],'ふ':['hu','fu'],'へ':['he'],'ほ':['ho'],
   'ま':['ma'],'み':['mi'],'む':['mu'],'め':['me'],'も':['mo'],
   'や':['ya'],'ゆ':['yu'],'よ':['yo'],
   'ら':['ra'],'り':['ri'],'る':['ru'],'れ':['re'],'ろ':['ro'],
-  'わ':['wa'],'を':['wo'],'ん':['n','nn'],
+  'わ':['wa'],'を':['wo'],'ん':['nn','n'],
   'が':['ga'],'ぎ':['gi'],'ぐ':['gu'],'げ':['ge'],'ご':['go'],
   'ざ':['za'],'じ':['ji','zi'],'ず':['zu'],'ぜ':['ze'],'ぞ':['zo'],
   'だ':['da'],'ぢ':['ji','di'],'づ':['zu','du'],'で':['de'],'ど':['do'],
@@ -374,7 +374,7 @@ function buildChunks(text) {
         var first = next2.options[0].charAt(0);
         if ('aiueoyn'.indexOf(first) !== -1) needsNN = true;
       }
-      chunks[idx].options = needsNN ? ['nn'] : ['n', 'nn'];
+      chunks[idx].options = needsNN ? ['nn'] : ['nn', 'n'];
     }
   }
   return chunks;
@@ -735,7 +735,7 @@ window.TypingCore = {
   var practiceReps = 0;
   var practiceSession = null;
   var practiceKeyHandler = null;
-  var PRACTICE_TARGET_REPS = 10;
+  var PRACTICE_TARGET_REPS = 5;
 
   function currentPracticeRow() { return Core.KANA_ROWS[practiceRowIndex]; }
 
