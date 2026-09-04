@@ -75,29 +75,46 @@ button:active { transform: scale(0.96); }
 
 .instruction-card { background:var(--surface); border-radius:var(--radius-lg); padding:16px 20px; box-shadow:var(--shadow-card); margin-bottom:18px; text-align:center; font-size:14px; line-height:1.9; color:var(--text-secondary); }
 
-.practice-stage { background:var(--surface); border-radius:var(--radius-lg); padding:26px; box-shadow:var(--shadow-card); text-align:center; margin-bottom:18px; }
-.practice-kana { font-size:88px; font-weight:700; line-height:1; margin-bottom:6px; transition:color 80ms ease; }
-.practice-kana.flash-ok { color:var(--success); }
-.practice-kana.flash-ng { color:var(--danger); }
-.practice-romaji { font-size:20px; letter-spacing:0.15em; color:var(--text-secondary); font-variant-numeric:tabular-nums; }
-.practice-rep-count { margin-top:10px; font-size:14px; color:var(--text-secondary); }
-.progress-track { height:8px; border-radius:4px; background:var(--fill-quiet); margin-top:16px; overflow:hidden; }
-.progress-fill { height:100%; background:var(--accent); border-radius:4px; transition:width 150ms ease; }
+.practice-stage { background:var(--surface); border-radius:var(--radius-lg); padding:16px 20px; box-shadow:var(--shadow-card); text-align:center; margin-bottom:12px; }
+.practice-row-wrap { display:flex; align-items:center; justify-content:center; gap:16px; flex-wrap:wrap; }
+.practice-row { font-size:48px; font-weight:700; letter-spacing:0.08em; line-height:1; }
+.practice-row .ch { transition:color 100ms ease; }
+.practice-row .ch.done { color:var(--text-secondary); }
+.practice-row .ch.current { color:var(--accent); }
+.practice-row .ch.flash-ok { color:var(--success); }
+.practice-row .ch.flash-ng { color:var(--danger); }
+.speech-bubble {
+  position:relative; background:var(--fill-quiet); color:var(--text); border-radius:14px; padding:10px 14px;
+  max-width:210px; font-size:13px; line-height:1.5; text-align:left;
+}
+.speech-bubble::before {
+  content:''; position:absolute; left:-8px; top:50%; transform:translateY(-50%);
+  border-width:7px 9px 7px 0; border-style:solid; border-color:transparent var(--fill-quiet) transparent transparent;
+}
+.practice-romaji-hint { margin-top:6px; font-size:16px; letter-spacing:0.1em; color:var(--text-secondary); font-variant-numeric:tabular-nums; }
+.rep-bar { display:flex; justify-content:center; gap:4px; margin-top:12px; }
+.rep-seg { width:20px; height:7px; border-radius:4px; background:var(--fill-quiet); transition:background 120ms ease; }
+.rep-seg.filled { background:var(--success); }
+.progress-track { height:6px; border-radius:3px; background:var(--fill-quiet); margin-top:10px; overflow:hidden; }
+.progress-fill { height:100%; background:var(--accent); border-radius:3px; transition:width 150ms ease; }
 
-.keyboard { max-width:620px; margin:0 auto; user-select:none; }
-.kb-row { display:flex; justify-content:center; gap:6px; margin-bottom:6px; }
+.keyboard { max-width:560px; margin:0 auto; user-select:none; }
+.kb-row { display:flex; justify-content:center; gap:5px; margin-bottom:5px; }
 .kb-key {
-  min-width:44px; height:44px; border-radius:9px; display:flex; align-items:center; justify-content:center;
-  font-size:15px; font-weight:700; color:#fff; opacity:0.55; transition:transform 80ms ease, opacity 80ms ease, box-shadow 80ms ease;
+  min-width:38px; height:38px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:700; color:#fff; opacity:0.55; transition:transform 80ms ease, opacity 80ms ease, box-shadow 80ms ease;
 }
 .kb-key.active { opacity:1; transform:scale(1.12); box-shadow:0 0 0 3px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.25); }
-.kb-key.space { min-width:220px; }
+.kb-key.space { min-width:200px; }
 .kb-f-lp { background:#e53e3e; } .kb-f-lr { background:#dd6b20; } .kb-f-lm { background:#d69e2e; } .kb-f-li { background:#38a169; }
 .kb-f-ri { background:#3182ce; } .kb-f-rm { background:#5a67d8; } .kb-f-rr { background:#805ad5; } .kb-f-rp { background:#d53f8c; }
 .kb-f-th { background:#718096; }
-.finger-legend { display:flex; flex-wrap:wrap; justify-content:center; gap:8px 14px; margin-top:16px; font-size:12px; color:var(--text-secondary); }
-.finger-legend span { display:inline-flex; align-items:center; gap:5px; }
-.finger-legend i { width:12px; height:12px; border-radius:3px; display:inline-block; }
+
+.hands-row { display:flex; justify-content:center; align-items:flex-end; gap:44px; margin-top:12px; }
+.hand-block { display:flex; flex-direction:column; align-items:center; }
+.hand-fingers { display:flex; align-items:flex-end; gap:3px; }
+.hand-finger { width:13px; border-radius:7px 7px 4px 4px; }
+.hand-palm { width:84px; height:26px; border-radius:12px 12px 18px 18px; background:var(--fill-quiet); margin-top:-3px; }
 
 .result-overlay {
   position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; padding:20px; z-index:20;
@@ -153,9 +170,14 @@ button:active { transform: scale(0.96); }
 
 @media (max-width: 640px) {
   body { padding:14px; }
-  .practice-kana { font-size:64px; }
-  .kb-key { min-width:30px; height:36px; font-size:12px; }
-  .kb-key.space { min-width:140px; }
+  .practice-row { font-size:34px; }
+  .practice-row-wrap { gap:10px; }
+  .speech-bubble { max-width:160px; font-size:12px; }
+  .speech-bubble::before { left:auto; top:-8px; right:50%; transform:translateX(50%) rotate(90deg); }
+  .kb-key { min-width:26px; height:32px; font-size:11px; }
+  .kb-key.space { min-width:120px; }
+  .hands-row { gap:26px; }
+  .hand-palm { width:64px; height:20px; }
   .lanes { height:340px; }
   .octopus-emoji { font-size:26px; }
   .octopus-word { font-size:14px; }
@@ -192,18 +214,17 @@ button:active { transform: scale(0.96); }
     <h1><ruby>練習<rt>れんしゅう</rt></ruby></h1>
     <span class="header-spacer"></span>
   </div>
-  <div class="instruction-card">
-    「<ruby>手元<rt>てもと</rt></ruby>を<ruby>見<rt>み</rt></ruby>ないで<ruby>打<rt>う</rt></ruby>とう!」<br>
-    「あ〜んまで、10<ruby>回<rt>かい</rt></ruby>ずつ<ruby>打<rt>う</rt></ruby>つ。<ruby>指<rt>ゆび</rt></ruby>の<ruby>確認<rt>かくにん</rt></ruby>も。」
-  </div>
   <div class="practice-stage">
-    <div id="practice-kana" class="practice-kana">あ</div>
-    <div id="practice-romaji" class="practice-romaji">a</div>
-    <div id="practice-rep-count" class="practice-rep-count">1 / 10</div>
+    <div class="practice-row-wrap">
+      <div id="practice-row" class="practice-row">あいうえお</div>
+      <div class="speech-bubble">「<ruby>手元<rt>てもと</rt></ruby>を<ruby>見<rt>み</rt></ruby>ないで<ruby>打<rt>う</rt></ruby>とう!」</div>
+    </div>
+    <div id="practice-romaji-hint" class="practice-romaji-hint">a</div>
+    <div id="rep-bar" class="rep-bar"></div>
     <div class="progress-track"><div id="practice-progress-fill" class="progress-fill" style="width:0%"></div></div>
   </div>
   <div id="practice-keyboard" class="keyboard"></div>
-  <div class="finger-legend" id="finger-legend"></div>
+  <div class="hands-row" id="hands-row"></div>
 </div>
 
 <div id="screen-word" class="screen" style="display:none">
@@ -305,6 +326,9 @@ var PUNCTUATION = ['、','。','!','?','・','ー','\n'];
 var GOJUON = ['あ','い','う','え','お','か','き','く','け','こ','さ','し','す','せ','そ',
   'た','ち','つ','て','と','な','に','ぬ','ね','の','は','ひ','ふ','へ','ほ',
   'ま','み','む','め','も','や','ゆ','よ','ら','り','る','れ','ろ','わ','を','ん'];
+
+var KANA_ROWS = ['あいうえお','かきくけこ','さしすせそ','たちつてと','なにぬねの',
+  'はひふへほ','まみむめも','やゆよ','らりるれろ','わをん'];
 
 function buildChunks(text) {
   var chars = Array.from(text);
@@ -497,6 +521,7 @@ var FINGER_LABELS = [
 window.TypingCore = {
   ROMAJI_TABLE: ROMAJI_TABLE,
   GOJUON: GOJUON,
+  KANA_ROWS: KANA_ROWS,
   buildChunks: buildChunks,
   createSession: createSession,
   handleKey: handleKey,
@@ -575,6 +600,18 @@ window.TypingCore = {
     });
   }
   function playClick() { if (settings.sfxOn) playTone(600, 0.12, 60); }
+  function playRepComplete() {
+    if (!settings.sfxOn) return;
+    [659.25, 880.0].forEach(function(freq, i) {
+      setTimeout(function() { playTone(freq, 0.16, 100); }, i * 70);
+    });
+  }
+  function playRowComplete() {
+    if (!settings.sfxOn) return;
+    [523.25, 659.25, 880.0].forEach(function(freq, i) {
+      setTimeout(function() { playTone(freq, 0.18, 150); }, i * 90);
+    });
+  }
 
   var BGM_PATTERNS = {
     'screen-home': { notes: [261.63, 329.63, 392.00, 329.63], tempo: 650 },
@@ -669,34 +706,46 @@ window.TypingCore = {
       el.classList.toggle('active', el.dataset.key === letter);
     });
   }
-  function renderFingerLegend() {
-    var legend = document.getElementById('finger-legend');
-    legend.innerHTML = '';
-    Core.FINGER_LABELS.forEach(function(f) {
-      var span = document.createElement('span');
-      var i = document.createElement('i');
-      i.className = 'kb-f-' + f.cls;
-      span.appendChild(i);
-      span.appendChild(document.createTextNode(f.name));
-      legend.appendChild(span);
+  var HAND_LAYOUT = {
+    left: [{ f: 'lp', h: 30 }, { f: 'lr', h: 42 }, { f: 'lm', h: 50 }, { f: 'li', h: 42 }, { f: 'th', h: 24 }],
+    right: [{ f: 'th', h: 24 }, { f: 'ri', h: 42 }, { f: 'rm', h: 50 }, { f: 'rr', h: 42 }, { f: 'rp', h: 30 }]
+  };
+  function renderHands(container) {
+    container.innerHTML = '';
+    ['left', 'right'].forEach(function(side) {
+      var block = document.createElement('div');
+      block.className = 'hand-block';
+      var fingers = document.createElement('div');
+      fingers.className = 'hand-fingers';
+      HAND_LAYOUT[side].forEach(function(item) {
+        var finger = document.createElement('div');
+        finger.className = 'hand-finger kb-f-' + item.f;
+        finger.style.height = item.h + 'px';
+        fingers.appendChild(finger);
+      });
+      var palm = document.createElement('div');
+      palm.className = 'hand-palm';
+      block.appendChild(fingers);
+      block.appendChild(palm);
+      container.appendChild(block);
     });
   }
-  renderFingerLegend();
 
   // ---- Practice screen ----
-  var practiceKanaIndex = 0;
+  var practiceRowIndex = 0;
   var practiceReps = 0;
   var practiceSession = null;
   var practiceKeyHandler = null;
   var PRACTICE_TARGET_REPS = 10;
 
-  function currentPracticeKana() { return Core.GOJUON[practiceKanaIndex]; }
+  function currentPracticeRow() { return Core.KANA_ROWS[practiceRowIndex]; }
 
   function startPractice() {
-    practiceKanaIndex = 0;
+    practiceRowIndex = 0;
     practiceReps = 0;
     renderKeyboard(document.getElementById('practice-keyboard'));
-    loadPracticeKana();
+    renderHands(document.getElementById('hands-row'));
+    loadPracticeRow();
     practiceKeyHandler = function(e) {
       if (!/^[a-z]$/.test(e.key)) return;
       handlePracticeKeystroke(e.key);
@@ -706,43 +755,84 @@ window.TypingCore = {
   function stopPractice() {
     if (practiceKeyHandler) { document.removeEventListener('keydown', practiceKeyHandler); practiceKeyHandler = null; }
   }
-  function loadPracticeKana() {
-    practiceSession = Core.createSession(currentPracticeKana());
-    document.getElementById('practice-kana').textContent = currentPracticeKana();
-    document.getElementById('practice-romaji').textContent = practiceSession.chunks[0].options[0];
-    document.getElementById('practice-rep-count').textContent = (practiceReps + 1) + ' / ' + PRACTICE_TARGET_REPS;
-    document.getElementById('practice-progress-fill').style.width = Math.round((practiceKanaIndex / Core.GOJUON.length) * 100) + '%';
-    highlightKey(document.getElementById('practice-keyboard'), practiceSession.chunks[0].options[0].charAt(0));
+  function loadPracticeRow() {
+    practiceSession = Core.createSession(currentPracticeRow());
+    renderPracticeRow();
+    renderRepBar();
+    document.getElementById('practice-progress-fill').style.width = Math.round((practiceRowIndex / Core.KANA_ROWS.length) * 100) + '%';
+    updatePracticeKeyboardHighlight();
+  }
+  function renderPracticeRow() {
+    var el = document.getElementById('practice-row');
+    el.innerHTML = '';
+    practiceSession.chunks.forEach(function(chunk, i) {
+      var span = document.createElement('span');
+      span.className = 'ch' + (i < practiceSession.index ? ' done' : i === practiceSession.index ? ' current' : '');
+      span.textContent = chunk.kana;
+      el.appendChild(span);
+    });
+    var currentChunk = practiceSession.chunks[practiceSession.index];
+    document.getElementById('practice-romaji-hint').textContent = currentChunk ? currentChunk.options[0] : '';
+  }
+  function renderRepBar() {
+    var bar = document.getElementById('rep-bar');
+    bar.innerHTML = '';
+    for (var i = 0; i < PRACTICE_TARGET_REPS; i++) {
+      var seg = document.createElement('div');
+      seg.className = 'rep-seg' + (i < practiceReps ? ' filled' : '');
+      bar.appendChild(seg);
+    }
+  }
+  function updatePracticeKeyboardHighlight() {
+    var chunk = practiceSession.chunks[practiceSession.index];
+    if (!chunk) { highlightKey(document.getElementById('practice-keyboard'), ''); return; }
+    var remaining = chunk.options[0].slice(practiceSession.buffer.length);
+    highlightKey(document.getElementById('practice-keyboard'), remaining.charAt(0) || '');
   }
   function handlePracticeKeystroke(letter) {
-    var kanaEl = document.getElementById('practice-kana');
+    var charIndex = practiceSession.index;
     var res = Core.handleKey(practiceSession, letter);
+    var spans = document.querySelectorAll('#practice-row .ch');
+    var typedSpan = spans[charIndex];
     if (res.result === 'miss') {
       playMistake();
-      kanaEl.classList.remove('flash-ok'); kanaEl.classList.add('flash-ng');
-      setTimeout(function() { kanaEl.classList.remove('flash-ng'); }, 150);
+      if (typedSpan) {
+        typedSpan.classList.add('flash-ng');
+        setTimeout(function() { typedSpan.classList.remove('flash-ng'); }, 150);
+      }
       return;
     }
     playCorrect();
-    kanaEl.classList.remove('flash-ng'); kanaEl.classList.add('flash-ok');
-    setTimeout(function() { kanaEl.classList.remove('flash-ok'); }, 150);
-    var chunk = practiceSession.chunks[0];
-    var remaining = chunk.options[0].slice(practiceSession.buffer.length);
-    highlightKey(document.getElementById('practice-keyboard'), remaining.charAt(0) || '');
-    if (res.result === 'complete') {
-      practiceReps++;
-      if (practiceReps >= PRACTICE_TARGET_REPS) {
-        practiceReps = 0;
-        practiceKanaIndex++;
-        if (practiceKanaIndex >= Core.GOJUON.length) {
-          playComplete();
-          stopPractice();
-          showPracticeFinished();
-          return;
-        }
-      }
-      loadPracticeKana();
+    if (typedSpan) {
+      typedSpan.classList.add('flash-ok');
+      setTimeout(function() { typedSpan.classList.remove('flash-ok'); }, 150);
     }
+    if (res.result === 'complete') {
+      playRepComplete();
+      renderPracticeRow();
+      practiceReps++;
+      renderRepBar();
+      if (practiceReps >= PRACTICE_TARGET_REPS) {
+        setTimeout(advancePracticeRow, 380);
+      } else {
+        setTimeout(loadPracticeRow, 260);
+      }
+      return;
+    }
+    renderPracticeRow();
+    updatePracticeKeyboardHighlight();
+  }
+  function advancePracticeRow() {
+    practiceReps = 0;
+    practiceRowIndex++;
+    if (practiceRowIndex >= Core.KANA_ROWS.length) {
+      playComplete();
+      stopPractice();
+      showPracticeFinished();
+      return;
+    }
+    playRowComplete();
+    loadPracticeRow();
   }
   function setResultStats(html) {
     document.getElementById('result-stats').innerHTML = html;
