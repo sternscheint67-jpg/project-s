@@ -191,7 +191,7 @@ button:active { transform: scale(0.96); }
 .sentence-text .ch.done { color:var(--text-secondary); }
 .sentence-text .ch.current { color:var(--accent); background:rgba(0,113,227,0.1); border-radius:4px; }
 .sentence-text .ch.error-flash { color:var(--danger); }
-.sentence-text .ch.punct { color:var(--text-secondary); }
+.sentence-text ruby.ch { ruby-position: over; }
 
 @media (max-width: 640px) {
   body { padding:14px; }
@@ -357,7 +357,7 @@ var ROMAJI_TABLE = {
 };
 
 var YOUON_SMALL = ['ゃ','ゅ','ょ'];
-var PUNCTUATION = ['、','。','!','?','・','ー','\n'];
+var PUNCT_ROMAJI = { '、': [','], '。': ['.'], '!': ['!'], '?': ['?'], '・': ['/'], 'ー': ['-'] };
 
 var GOJUON = ['あ','い','う','え','お','か','き','く','け','こ','さ','し','す','せ','そ',
   'た','ち','つ','て','と','な','に','ぬ','ね','の','は','ひ','ふ','へ','ほ',
@@ -372,8 +372,13 @@ function buildChunks(text) {
   var i = 0;
   while (i < chars.length) {
     var c = chars[i];
-    if (PUNCTUATION.indexOf(c) !== -1 || c === '　' || c === ' ') {
-      chunks.push({ kana: c, type: 'punct', options: [] });
+    if (c === '　' || c === ' ') {
+      chunks.push({ kana: c, type: 'skip', options: [] });
+      i++;
+      continue;
+    }
+    if (PUNCT_ROMAJI[c]) {
+      chunks.push({ kana: c, type: 'punct', options: PUNCT_ROMAJI[c].slice() });
       i++;
       continue;
     }
@@ -393,7 +398,7 @@ function buildChunks(text) {
       i++;
       continue;
     }
-    chunks.push({ kana: c, type: 'punct', options: [] });
+    chunks.push({ kana: c, type: 'skip', options: [] });
     i++;
   }
   for (var idx = 0; idx < chunks.length; idx++) {
@@ -417,8 +422,8 @@ function buildChunks(text) {
   return chunks;
 }
 
-function skipPunct(session) {
-  while (session.index < session.chunks.length && session.chunks[session.index].type === 'punct') {
+function skipUntypeable(session) {
+  while (session.index < session.chunks.length && session.chunks[session.index].type === 'skip') {
     session.index++;
   }
   if (session.index >= session.chunks.length) session.finished = true;
@@ -426,7 +431,7 @@ function skipPunct(session) {
 
 function createSession(text) {
   var session = { chunks: buildChunks(text), index: 0, buffer: '', mistakes: 0, startTime: null, endTime: null, finished: false };
-  skipPunct(session);
+  skipUntypeable(session);
   return session;
 }
 
@@ -445,7 +450,7 @@ function handleKey(session, letter) {
   if (isComplete) {
     session.index++;
     session.buffer = '';
-    skipPunct(session);
+    skipUntypeable(session);
     if (session.finished) {
       session.endTime = Date.now();
       return { result: 'complete' };
@@ -456,7 +461,7 @@ function handleKey(session, letter) {
 }
 
 function gradeSession(session) {
-  var totalKana = session.chunks.filter(function(c) { return c.type === 'kana'; }).length;
+  var totalKana = session.chunks.filter(function(c) { return c.type === 'kana' || c.type === 'punct'; }).length;
   var elapsedMs = Math.max((session.endTime || Date.now()) - session.startTime, 1);
   var minutes = elapsedMs / 60000;
   var cpm = totalKana / minutes;
@@ -481,22 +486,24 @@ function randomWord() {
   return WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
 }
 
+// Each sentence is a list of segments: { t: displayed text, r: hiragana reading to type }.
+// A segment where t !== r is a kanji word shown with furigana; where t === r it's typed as-is.
 var SENTENCE_POOL = [
-  'きょうはてんきがいいですね。',
-  'わたしはまいあささんぽをします。',
-  'ねこがまどのそとをみています。',
-  'としょかんでほんをかりました。',
-  'あしたはともだちとこうえんへいきます。',
-  'あさごはんにたまごやきをたべました。',
-  'でんしゃにのってがっこうへいきます。',
-  'にわにきれいなはながさいています。',
-  'よるははやくねるようにしています。',
-  'しゅくだいをおわらせてからあそびます。',
-  'あめのひはかさをもってでかけます。',
-  'としょしつでしずかにほんをよみます。',
-  'おかあさんといっしょにりょうりをしました。',
-  'なつやすみにうみへいくよていです。',
-  'あたらしいくつをかってもらいました。'
+  [{t:'今日',r:'きょう'},{t:'は',r:'は'},{t:'天気',r:'てんき'},{t:'が',r:'が'},{t:'いい',r:'いい'},{t:'です',r:'です'},{t:'ね',r:'ね'},{t:'。',r:'。'}],
+  [{t:'わたし',r:'わたし'},{t:'は',r:'は'},{t:'毎朝',r:'まいあさ'},{t:'さんぽ',r:'さんぽ'},{t:'を',r:'を'},{t:'します',r:'します'},{t:'。',r:'。'}],
+  [{t:'ねこ',r:'ねこ'},{t:'が',r:'が'},{t:'まどのそとを',r:'まどのそとを'},{t:'見',r:'み'},{t:'ています',r:'ています'},{t:'。',r:'。'}],
+  [{t:'学校',r:'がっこう'},{t:'で',r:'で'},{t:'本',r:'ほん'},{t:'を',r:'を'},{t:'かりました',r:'かりました'},{t:'。',r:'。'}],
+  [{t:'明日',r:'あした'},{t:'は',r:'は'},{t:'友',r:'とも'},{t:'だち',r:'だち'},{t:'と',r:'と'},{t:'公園',r:'こうえん'},{t:'へ',r:'へ'},{t:'行',r:'い'},{t:'きます',r:'きます'},{t:'。',r:'。'}],
+  [{t:'朝',r:'あさ'},{t:'ごはんに',r:'ごはんに'},{t:'たまごやきを',r:'たまごやきを'},{t:'食',r:'た'},{t:'べました',r:'べました'},{t:'。',r:'。'}],
+  [{t:'電車',r:'でんしゃ'},{t:'に',r:'に'},{t:'のって',r:'のって'},{t:'学校',r:'がっこう'},{t:'へ',r:'へ'},{t:'行',r:'い'},{t:'きます',r:'きます'},{t:'。',r:'。'}],
+  [{t:'にわにきれいな',r:'にわにきれいな'},{t:'花',r:'はな'},{t:'が',r:'が'},{t:'さいています',r:'さいています'},{t:'。',r:'。'}],
+  [{t:'夜',r:'よる'},{t:'は',r:'は'},{t:'早',r:'はや'},{t:'く',r:'く'},{t:'ねるようにしています',r:'ねるようにしています'},{t:'。',r:'。'}],
+  [{t:'しゅくだいをおわらせてからあそびます',r:'しゅくだいをおわらせてからあそびます'},{t:'。',r:'。'}],
+  [{t:'雨',r:'あめ'},{t:'の',r:'の'},{t:'日',r:'ひ'},{t:'は',r:'は'},{t:'かさをもって',r:'かさをもって'},{t:'出',r:'で'},{t:'かけます',r:'かけます'},{t:'。',r:'。'}],
+  [{t:'学校',r:'がっこう'},{t:'でしずかに',r:'でしずかに'},{t:'本',r:'ほん'},{t:'を',r:'を'},{t:'読',r:'よ'},{t:'みます',r:'みます'},{t:'。',r:'。'}],
+  [{t:'お',r:'お'},{t:'母',r:'かあ'},{t:'さんといっしょに',r:'さんといっしょに'},{t:'りょうりを',r:'りょうりを'},{t:'しました',r:'しました'},{t:'。',r:'。'}],
+  [{t:'夏',r:'なつ'},{t:'休',r:'やす'},{t:'みに',r:'みに'},{t:'海',r:'うみ'},{t:'へ',r:'へ'},{t:'行',r:'い'},{t:'くよていです',r:'くよていです'},{t:'。',r:'。'}],
+  [{t:'新',r:'あたら'},{t:'しいくつを',r:'しいくつを'},{t:'買',r:'か'},{t:'って',r:'って'},{t:'もらいました',r:'もらいました'},{t:'。',r:'。'}]
 ];
 
 function shuffled(arr) {
@@ -509,20 +516,33 @@ function shuffled(arr) {
 }
 
 function kanaLength(text) {
-  return Array.from(text).filter(function(c) {
-    return PUNCTUATION.indexOf(c) === -1 && c !== '　' && c !== ' ';
-  }).length;
+  return Array.from(text).filter(function(c) { return c !== '　' && c !== ' '; }).length;
 }
 
-function buildLevelText(targetLength) {
+function sentenceReading(segments) {
+  return segments.map(function(seg) { return seg.r; }).join('');
+}
+
+function buildSegmentMap(segments) {
+  var map = [];
+  var offset = 0;
+  segments.forEach(function(seg) {
+    var count = buildChunks(seg.r).length;
+    map.push({ seg: seg, start: offset, end: offset + count });
+    offset += count;
+  });
+  return map;
+}
+
+function buildLevelSegments(targetLength) {
   var pool = shuffled(SENTENCE_POOL);
-  var result = '';
+  var result = [];
   var count = 0;
   var i = 0;
   while (count < targetLength) {
-    var s = pool[i % pool.length];
-    result += s;
-    count += kanaLength(s);
+    var sentenceSegs = pool[i % pool.length];
+    result = result.concat(sentenceSegs);
+    count += kanaLength(sentenceReading(sentenceSegs));
     i++;
     if (i > pool.length * 4) break;
   }
@@ -566,7 +586,9 @@ window.TypingCore = {
   randomWord: randomWord,
   SENTENCE_POOL: SENTENCE_POOL,
   kanaLength: kanaLength,
-  buildLevelText: buildLevelText,
+  sentenceReading: sentenceReading,
+  buildSegmentMap: buildSegmentMap,
+  buildLevelSegments: buildLevelSegments,
   LEVELS: LEVELS,
   FINGER_MAP: FINGER_MAP,
   KEYBOARD_ROWS: KEYBOARD_ROWS,
@@ -1145,21 +1167,23 @@ window.TypingCore = {
   // ---- Sentence typing ----
   var sentenceSession = null;
   var sentenceLevel = null;
+  var sentenceSegmentMap = null;
   var sentenceKeyHandler = null;
   var sentenceTimerInterval = null;
 
   function startSentence(level) {
     sentenceLevel = level;
     document.getElementById('sentence-level-title').innerHTML = level.label;
-    var text = Core.buildLevelText(level.length);
-    sentenceSession = Core.createSession(text);
-    var totalKana = sentenceSession.chunks.filter(function(c) { return c.type === 'kana'; }).length;
+    var segments = Core.buildLevelSegments(level.length);
+    sentenceSession = Core.createSession(Core.sentenceReading(segments));
+    sentenceSegmentMap = Core.buildSegmentMap(segments);
+    var totalKana = sentenceSession.chunks.filter(function(c) { return c.type === 'kana' || c.type === 'punct'; }).length;
     document.getElementById('sentence-total-count').textContent = totalKana;
     document.getElementById('sentence-progress-count').textContent = 0;
     document.getElementById('sentence-timer').textContent = '0.0';
     renderSentenceDisplay();
     sentenceKeyHandler = function(e) {
-      if (!/^[a-z]$/.test(e.key)) return;
+      if (!/^[a-z.,!?/-]$/.test(e.key)) return;
       handleSentenceKeystroke(e.key);
     };
     document.addEventListener('keydown', sentenceKeyHandler);
@@ -1178,27 +1202,45 @@ window.TypingCore = {
     var el = document.getElementById('sentence-text');
     el.innerHTML = '';
     var doneKana = 0;
-    sentenceSession.chunks.forEach(function(chunk, i) {
-      var span = document.createElement('span');
-      var cls = 'ch';
-      if (chunk.type === 'punct') cls += ' punct';
-      if (i < sentenceSession.index) { cls += ' done'; if (chunk.type === 'kana') doneKana++; }
-      else if (i === sentenceSession.index) cls += ' current';
-      span.className = cls;
-      span.textContent = chunk.kana;
-      el.appendChild(span);
+    sentenceSegmentMap.forEach(function(entry) {
+      var seg = entry.seg;
+      var isKanji = seg.t !== seg.r;
+      var segDone = entry.end <= sentenceSession.index;
+      var segCurrent = sentenceSession.index >= entry.start && sentenceSession.index < entry.end;
+      if (segDone) {
+        for (var idx = entry.start; idx < entry.end; idx++) {
+          var c = sentenceSession.chunks[idx];
+          if (c.type === 'kana' || c.type === 'punct') doneKana++;
+        }
+      }
+      if (isKanji) {
+        var ruby = document.createElement('ruby');
+        ruby.className = 'ch' + (segDone ? ' done' : segCurrent ? ' current' : '');
+        ruby.appendChild(document.createTextNode(seg.t));
+        var rt = document.createElement('rt');
+        rt.textContent = seg.r;
+        ruby.appendChild(rt);
+        el.appendChild(ruby);
+      } else {
+        for (var i = entry.start; i < entry.end; i++) {
+          var chunk = sentenceSession.chunks[i];
+          var span = document.createElement('span');
+          span.className = 'ch' + (i < sentenceSession.index ? ' done' : i === sentenceSession.index ? ' current' : '');
+          span.textContent = chunk.kana;
+          el.appendChild(span);
+        }
+      }
     });
     document.getElementById('sentence-progress-count').textContent = doneKana;
   }
   function handleSentenceKeystroke(letter) {
     var res = Core.handleKey(sentenceSession, letter);
-    var spans = document.querySelectorAll('#sentence-text .ch');
     if (res.result === 'miss') {
       playMistake();
-      var errSpan = spans[sentenceSession.index];
-      if (errSpan) {
-        errSpan.classList.add('error-flash');
-        setTimeout(function() { errSpan.classList.remove('error-flash'); }, 200);
+      var errEl = document.querySelector('#sentence-text .ch.current');
+      if (errEl) {
+        errEl.classList.add('error-flash');
+        setTimeout(function() { errEl.classList.remove('error-flash'); }, 200);
       }
       return;
     }
