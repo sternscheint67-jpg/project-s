@@ -75,6 +75,7 @@ button:active { transform: scale(0.96); }
 .badge-practice { background:linear-gradient(135deg,#8ec9ff,#3d8bf0); }
 .badge-word { background:linear-gradient(135deg,#8fe3c2,#2fb583); }
 .badge-sentence { background:linear-gradient(135deg,#ffb8dd,#f2569e); }
+.badge-romaji { background:linear-gradient(135deg,#c9b8ff,#8b6ff0); }
 .menu-label { flex:1; text-align:left; }
 .menu-chevron { color:var(--text-secondary); font-size:20px; opacity:0.45; font-weight:400; }
 
@@ -193,6 +194,75 @@ button:active { transform: scale(0.96); }
 .sentence-text .ch.error-flash { color:var(--danger); }
 .sentence-text ruby.ch { ruby-position: over; }
 
+.rtbl { background:var(--surface); border-radius:var(--radius-lg); padding:20px 22px; box-shadow:var(--shadow-card); }
+.rtbl-title { text-align:center; font-size:22px; font-weight:800; letter-spacing:0.02em; margin:0 0 2px; }
+.rtbl-subtitle { text-align:center; color:var(--text-secondary); font-size:11.5px; margin:0 0 14px; }
+.rtbl-layout { display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap; }
+.rtbl-col { flex:1; min-width:260px; }
+.rtbl h2 { font-size:13.5px; font-weight:700; margin:0 0 5px; padding-left:8px; border-left:5px solid var(--accent); }
+.rtbl-seion h2 { border-left-color:#3d8bf0; }
+.rtbl-dakuon h2 { border-left-color:#f2569e; }
+.rtbl-youon h2 { border-left-color:#2fb583; }
+.rtbl-kb-title { border-left-color:#718096 !important; }
+.rtbl table { border-collapse:collapse; width:100%; table-layout:fixed; margin-bottom:6px; }
+.rtbl td, .rtbl th { border:1px solid var(--hairline); text-align:center; padding:1px; vertical-align:middle; }
+.rtbl th { background:var(--fill-quiet); font-size:10px; font-weight:600; color:var(--text-secondary); height:16px; width:15%; }
+.rtbl-youon th { width:20%; }
+.rtbl-kanacell { height:40px; }
+.rtbl-youon .rtbl-kanacell { height:34px; }
+.rtbl-empty { background:rgba(0,0,0,0.02); border-style:dashed; }
+.rtbl-kana { font-size:18px; font-weight:700; line-height:1.1; }
+.rtbl-youon .rtbl-kana { font-size:16px; }
+.rtbl-romaji { font-size:11px; font-weight:700; color:#0071e3; letter-spacing:0.02em; }
+.rtbl-romaji-alt { font-size:8.5px; color:var(--text-secondary); }
+.rtbl-seion .rtbl-kanacell { background:#f5faff; }
+.rtbl-dakuon .rtbl-kanacell { background:#fff3f9; }
+.rtbl-dakuon .rtbl-romaji { color:#d63384; }
+.rtbl-youon .rtbl-kanacell { background:#f2fbf6; }
+.rtbl-youon .rtbl-romaji { color:#2fa572; }
+
+.rtbl-n-box { display:flex; align-items:center; gap:10px; border:2px solid #e0912f; border-radius:12px; background:#fff8ef; padding:6px 12px; margin-bottom:6px; }
+.rtbl-n-box .rtbl-kana { font-size:22px; color:#b9650a; }
+.rtbl-n-box .rtbl-desc { font-size:10.5px; color:var(--text-secondary); line-height:1.4; text-align:left; }
+.rtbl-n-box .rtbl-desc b.rtbl-romaji { font-size:12.5px; }
+
+.rtbl-smallkana-box { border:2px solid #718096; border-radius:12px; padding:6px 12px; background:rgba(113,128,150,0.06); margin-bottom:6px; }
+.rtbl-box-title { display:block; font-size:11px; color:var(--text-secondary); margin-bottom:4px; }
+.rtbl-smallkana-row { display:flex; justify-content:space-around; align-items:baseline; }
+.rtbl-smallkana-pair { display:flex; align-items:baseline; gap:2px; }
+.rtbl-smallkana-pair .rtbl-big { font-size:21px; font-weight:700; }
+.rtbl-smallkana-pair .rtbl-arrow { font-size:11px; color:var(--text-secondary); margin:0 1px; }
+.rtbl-smallkana-pair .rtbl-small { font-size:14px; font-weight:700; color:#b9650a; }
+.rtbl-smallkana-desc { text-align:center; font-size:9.5px; color:var(--text-secondary); margin-top:3px; }
+
+.rtbl-sokuon-box { border:2px dashed #e0912f; border-radius:12px; padding:6px 12px; background:#fff8ef; font-size:10.5px; line-height:1.5; color:var(--text); margin-bottom:6px; }
+.rtbl-sokuon-box b { color:#b9650a; }
+.rtbl-sokuon-example { display:flex; align-items:baseline; gap:6px; margin-top:4px; font-size:12.5px; }
+.rtbl-sokuon-example .rtbl-kana { font-size:14px; font-weight:700; }
+.rtbl-sokuon-example .rtbl-romaji { font-size:11.5px; }
+
+.rtbl-keyboard-mini { margin-top:2px; }
+.rtbl-kb-row { display:flex; justify-content:center; gap:3px; margin-bottom:3px; }
+.rtbl-kb-key {
+  min-width:24px; height:24px; border-radius:5px; display:flex; align-items:center; justify-content:center;
+  font-size:10.5px; font-weight:700; color:#fff; opacity:0.88;
+}
+.rtbl-kb-space { min-width:132px; }
+.rtbl-kb-f-lp { background:#e53e3e; } .rtbl-kb-f-lr { background:#dd6b20; } .rtbl-kb-f-lm { background:#d69e2e; } .rtbl-kb-f-li { background:#38a169; }
+.rtbl-kb-f-ri { background:#3182ce; } .rtbl-kb-f-rm { background:#5a67d8; } .rtbl-kb-f-rr { background:#805ad5; } .rtbl-kb-f-th { background:#718096; }
+.rtbl-kb-caption { text-align:center; font-size:10px; color:var(--text-secondary); margin-top:4px; }
+.rtbl-footer { text-align:center; font-size:10px; color:var(--text-secondary); margin-top:10px; }
+
+@media print {
+  @page { size: A4 landscape; margin: 10mm; }
+  body * { visibility: hidden; }
+  #romaji-table-print, #romaji-table-print * { visibility: visible; }
+  body { padding:0; background:none; }
+  .screen { max-width:none; margin:0; }
+  #romaji-table-print { position:absolute; top:0; left:0; width:100%; padding:0; box-shadow:none; background:none; }
+  .no-print { display:none !important; }
+}
+
 @media (max-width: 640px) {
   body { padding:14px; }
   .practice-row { font-size:34px; }
@@ -228,6 +298,11 @@ button:active { transform: scale(0.96); }
     <button type="button" class="menu-btn sentence" data-mode="sentence">
       <span class="menu-icon-badge badge-sentence" data-icon="book"></span>
       <span class="menu-label"><ruby>文章<rt>ぶんしょう</rt></ruby></span>
+      <span class="menu-chevron">›</span>
+    </button>
+    <button type="button" class="menu-btn romaji-table" data-mode="romaji-table">
+      <span class="menu-icon-badge badge-romaji" data-icon="table"></span>
+      <span class="menu-label">ローマ<ruby>字表<rt>じひょう</rt></ruby></span>
       <span class="menu-chevron">›</span>
     </button>
   </div>
@@ -309,6 +384,265 @@ button:active { transform: scale(0.96); }
   </div>
   <div class="sentence-card">
     <div id="sentence-text" class="sentence-text"></div>
+  </div>
+</div>
+
+<div id="screen-romaji-table" class="screen" style="display:none">
+  <div class="header-row no-print">
+    <button type="button" class="link-btn back-btn" data-target="screen-home">← もどる</button>
+    <h1>ローマ<ruby>字表<rt>じひょう</rt></ruby></h1>
+    <button type="button" id="print-romaji-table-btn" class="link-btn"><ruby>印刷<rt>いんさつ</rt></ruby>する</button>
+  </div>
+  <div id="romaji-table-print" class="rtbl">
+    <h1 class="rtbl-title">ローマ<ruby>字表<rt>じひょう</rt></ruby></h1>
+    <p class="rtbl-subtitle">タイピング<ruby>練習<rt>れんしゅう</rt></ruby>アプリ &nbsp;|&nbsp; ローマ<ruby>字<rt>じ</rt></ruby>は2しゅるいまで<ruby>打<rt>う</rt></ruby>てるよ(れい: し → si でも shi でもOK)</p>
+
+    <div class="rtbl-layout">
+      <div class="rtbl-col rtbl-seion">
+        <h2>せいおん(あ〜わ<ruby>行<rt>ぎょう</rt></ruby>)</h2>
+        <table>
+          <tr><th></th><th>あ</th><th>い</th><th>う</th><th>え</th><th>お</th></tr>
+          <tr>
+            <th>あ<ruby>行<rt>ぎょう</rt></ruby></th>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">あ</div><div class="rtbl-romaji">a</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">い</div><div class="rtbl-romaji">i</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">う</div><div class="rtbl-romaji">u</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">え</div><div class="rtbl-romaji">e</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">お</div><div class="rtbl-romaji">o</div></td>
+          </tr>
+          <tr>
+            <th>か<ruby>行<rt>ぎょう</rt></ruby></th>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">か</div><div class="rtbl-romaji">ka</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">き</div><div class="rtbl-romaji">ki</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">く</div><div class="rtbl-romaji">ku</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">け</div><div class="rtbl-romaji">ke</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">こ</div><div class="rtbl-romaji">ko</div></td>
+          </tr>
+          <tr>
+            <th>さ<ruby>行<rt>ぎょう</rt></ruby></th>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">さ</div><div class="rtbl-romaji">sa</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">し</div><div class="rtbl-romaji">si</div><div class="rtbl-romaji-alt">(shi)</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">す</div><div class="rtbl-romaji">su</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">せ</div><div class="rtbl-romaji">se</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">そ</div><div class="rtbl-romaji">so</div></td>
+          </tr>
+          <tr>
+            <th>た<ruby>行<rt>ぎょう</rt></ruby></th>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">た</div><div class="rtbl-romaji">ta</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">ち</div><div class="rtbl-romaji">ti</div><div class="rtbl-romaji-alt">(chi)</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">つ</div><div class="rtbl-romaji">tu</div><div class="rtbl-romaji-alt">(tsu)</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">て</div><div class="rtbl-romaji">te</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">と</div><div class="rtbl-romaji">to</div></td>
+          </tr>
+          <tr>
+            <th>な<ruby>行<rt>ぎょう</rt></ruby></th>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">な</div><div class="rtbl-romaji">na</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">に</div><div class="rtbl-romaji">ni</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">ぬ</div><div class="rtbl-romaji">nu</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">ね</div><div class="rtbl-romaji">ne</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">の</div><div class="rtbl-romaji">no</div></td>
+          </tr>
+          <tr>
+            <th>は<ruby>行<rt>ぎょう</rt></ruby></th>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">は</div><div class="rtbl-romaji">ha</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">ひ</div><div class="rtbl-romaji">hi</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">ふ</div><div class="rtbl-romaji">hu</div><div class="rtbl-romaji-alt">(fu)</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">へ</div><div class="rtbl-romaji">he</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">ほ</div><div class="rtbl-romaji">ho</div></td>
+          </tr>
+          <tr>
+            <th>ま<ruby>行<rt>ぎょう</rt></ruby></th>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">ま</div><div class="rtbl-romaji">ma</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">み</div><div class="rtbl-romaji">mi</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">む</div><div class="rtbl-romaji">mu</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">め</div><div class="rtbl-romaji">me</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">も</div><div class="rtbl-romaji">mo</div></td>
+          </tr>
+          <tr>
+            <th>や<ruby>行<rt>ぎょう</rt></ruby></th>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">や</div><div class="rtbl-romaji">ya</div></td>
+            <td class="rtbl-empty"></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">ゆ</div><div class="rtbl-romaji">yu</div></td>
+            <td class="rtbl-empty"></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">よ</div><div class="rtbl-romaji">yo</div></td>
+          </tr>
+          <tr>
+            <th>ら<ruby>行<rt>ぎょう</rt></ruby></th>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">ら</div><div class="rtbl-romaji">ra</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">り</div><div class="rtbl-romaji">ri</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">る</div><div class="rtbl-romaji">ru</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">れ</div><div class="rtbl-romaji">re</div></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">ろ</div><div class="rtbl-romaji">ro</div></td>
+          </tr>
+          <tr>
+            <th>わ<ruby>行<rt>ぎょう</rt></ruby></th>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">わ</div><div class="rtbl-romaji">wa</div></td>
+            <td class="rtbl-empty"></td>
+            <td class="rtbl-empty"></td>
+            <td class="rtbl-empty"></td>
+            <td class="rtbl-kanacell"><div class="rtbl-kana">を</div><div class="rtbl-romaji">wo</div></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="rtbl-col">
+        <div class="rtbl-dakuon">
+          <h2>だくおん・はんだくおん(が〜ぱ<ruby>行<rt>ぎょう</rt></ruby>)</h2>
+          <table>
+            <tr><th></th><th>あ</th><th>い</th><th>う</th><th>え</th><th>お</th></tr>
+            <tr>
+              <th>が<ruby>行<rt>ぎょう</rt></ruby></th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">が</div><div class="rtbl-romaji">ga</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぎ</div><div class="rtbl-romaji">gi</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぐ</div><div class="rtbl-romaji">gu</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">げ</div><div class="rtbl-romaji">ge</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ご</div><div class="rtbl-romaji">go</div></td>
+            </tr>
+            <tr>
+              <th>ざ<ruby>行<rt>ぎょう</rt></ruby></th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ざ</div><div class="rtbl-romaji">za</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">じ</div><div class="rtbl-romaji">zi</div><div class="rtbl-romaji-alt">(ji)</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ず</div><div class="rtbl-romaji">zu</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぜ</div><div class="rtbl-romaji">ze</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぞ</div><div class="rtbl-romaji">zo</div></td>
+            </tr>
+            <tr>
+              <th>だ<ruby>行<rt>ぎょう</rt></ruby></th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">だ</div><div class="rtbl-romaji">da</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぢ</div><div class="rtbl-romaji">di</div><div class="rtbl-romaji-alt">(ji)</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">づ</div><div class="rtbl-romaji">du</div><div class="rtbl-romaji-alt">(zu)</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">で</div><div class="rtbl-romaji">de</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ど</div><div class="rtbl-romaji">do</div></td>
+            </tr>
+            <tr>
+              <th>ば<ruby>行<rt>ぎょう</rt></ruby></th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ば</div><div class="rtbl-romaji">ba</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">び</div><div class="rtbl-romaji">bi</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぶ</div><div class="rtbl-romaji">bu</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">べ</div><div class="rtbl-romaji">be</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぼ</div><div class="rtbl-romaji">bo</div></td>
+            </tr>
+            <tr>
+              <th>ぱ<ruby>行<rt>ぎょう</rt></ruby></th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぱ</div><div class="rtbl-romaji">pa</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぴ</div><div class="rtbl-romaji">pi</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぷ</div><div class="rtbl-romaji">pu</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぺ</div><div class="rtbl-romaji">pe</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぽ</div><div class="rtbl-romaji">po</div></td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="rtbl-n-box">
+          <div class="rtbl-kana">ん</div>
+          <div class="rtbl-desc"><b class="rtbl-romaji">nn</b> と2かい<ruby>打<rt>う</rt></ruby>つよ<br>(<ruby>母音<rt>ぼいん</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>は かならず nn)</div>
+        </div>
+
+        <div class="rtbl-smallkana-box">
+          <b class="rtbl-box-title"><ruby>小<rt>ちい</rt></ruby>さい<ruby>文字<rt>もじ</rt></ruby></b>
+          <div class="rtbl-smallkana-row">
+            <span class="rtbl-smallkana-pair"><span class="rtbl-big">つ</span><span class="rtbl-arrow">→</span><span class="rtbl-small">っ</span></span>
+            <span class="rtbl-smallkana-pair"><span class="rtbl-big">や</span><span class="rtbl-arrow">→</span><span class="rtbl-small">ゃ</span></span>
+            <span class="rtbl-smallkana-pair"><span class="rtbl-big">ゆ</span><span class="rtbl-arrow">→</span><span class="rtbl-small">ゅ</span></span>
+            <span class="rtbl-smallkana-pair"><span class="rtbl-big">よ</span><span class="rtbl-arrow">→</span><span class="rtbl-small">ょ</span></span>
+          </div>
+          <div class="rtbl-smallkana-desc"><ruby>右<rt>みぎ</rt></ruby>がわが<ruby>小<rt>ちい</rt></ruby>さく<ruby>書<rt>か</rt></ruby>く<ruby>文字<rt>もじ</rt></ruby>だよ</div>
+        </div>
+
+        <div class="rtbl-sokuon-box">
+          <b><ruby>小<rt>ちい</rt></ruby>さい「っ」のうちかた</b><br>
+          つぎの<ruby>音<rt>おと</rt></ruby>の<ruby>子音<rt>しいん</rt></ruby>を1かい<ruby>多<rt>おお</rt></ruby>く<ruby>打<rt>う</rt></ruby>つ。または <b>ltu</b> か <b>xtu</b> でもOK。
+          <div class="rtbl-sokuon-example"><span class="rtbl-kana">がっこう</span><span class="rtbl-romaji">ga <b>k</b> kou</span></div>
+          <div class="rtbl-sokuon-example"><span class="rtbl-kana">きって</span><span class="rtbl-romaji">ki <b>t</b> te</span></div>
+        </div>
+      </div>
+
+      <div class="rtbl-col">
+        <div class="rtbl-youon">
+          <h2>ようおん(<ruby>小<rt>ちい</rt></ruby>さい ゃゅょ)</h2>
+          <table>
+            <tr><th></th><th>ゃ</th><th>ゅ</th><th>ょ</th></tr>
+            <tr><th>き</th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">きゃ</div><div class="rtbl-romaji">kya</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">きゅ</div><div class="rtbl-romaji">kyu</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">きょ</div><div class="rtbl-romaji">kyo</div></td>
+            </tr>
+            <tr><th>し</th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">しゃ</div><div class="rtbl-romaji">sya</div><div class="rtbl-romaji-alt">(sha)</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">しゅ</div><div class="rtbl-romaji">syu</div><div class="rtbl-romaji-alt">(shu)</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">しょ</div><div class="rtbl-romaji">syo</div><div class="rtbl-romaji-alt">(sho)</div></td>
+            </tr>
+            <tr><th>ち</th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ちゃ</div><div class="rtbl-romaji">tya</div><div class="rtbl-romaji-alt">(cha)</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ちゅ</div><div class="rtbl-romaji">tyu</div><div class="rtbl-romaji-alt">(chu)</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ちょ</div><div class="rtbl-romaji">tyo</div><div class="rtbl-romaji-alt">(cho)</div></td>
+            </tr>
+            <tr><th>に</th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">にゃ</div><div class="rtbl-romaji">nya</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">にゅ</div><div class="rtbl-romaji">nyu</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">にょ</div><div class="rtbl-romaji">nyo</div></td>
+            </tr>
+            <tr><th>ひ</th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ひゃ</div><div class="rtbl-romaji">hya</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ひゅ</div><div class="rtbl-romaji">hyu</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ひょ</div><div class="rtbl-romaji">hyo</div></td>
+            </tr>
+            <tr><th>み</th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">みゃ</div><div class="rtbl-romaji">mya</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">みゅ</div><div class="rtbl-romaji">myu</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">みょ</div><div class="rtbl-romaji">myo</div></td>
+            </tr>
+            <tr><th>り</th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">りゃ</div><div class="rtbl-romaji">rya</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">りゅ</div><div class="rtbl-romaji">ryu</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">りょ</div><div class="rtbl-romaji">ryo</div></td>
+            </tr>
+            <tr><th>ぎ</th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぎゃ</div><div class="rtbl-romaji">gya</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぎゅ</div><div class="rtbl-romaji">gyu</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぎょ</div><div class="rtbl-romaji">gyo</div></td>
+            </tr>
+            <tr><th>じ</th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">じゃ</div><div class="rtbl-romaji">zya</div><div class="rtbl-romaji-alt">(ja)</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">じゅ</div><div class="rtbl-romaji">zyu</div><div class="rtbl-romaji-alt">(ju)</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">じょ</div><div class="rtbl-romaji">zyo</div><div class="rtbl-romaji-alt">(jo)</div></td>
+            </tr>
+            <tr><th>び</th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">びゃ</div><div class="rtbl-romaji">bya</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">びゅ</div><div class="rtbl-romaji">byu</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">びょ</div><div class="rtbl-romaji">byo</div></td>
+            </tr>
+            <tr><th>ぴ</th>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぴゃ</div><div class="rtbl-romaji">pya</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぴゅ</div><div class="rtbl-romaji">pyu</div></td>
+              <td class="rtbl-kanacell"><div class="rtbl-kana">ぴょ</div><div class="rtbl-romaji">pyo</div></td>
+            </tr>
+          </table>
+        </div>
+
+        <div>
+          <h2 class="rtbl-kb-title">キーボードの<ruby>指<rt>ゆび</rt></ruby></h2>
+          <div class="rtbl-keyboard-mini">
+            <div class="rtbl-kb-row">
+              <div class="rtbl-kb-key rtbl-kb-f-lp">q</div><div class="rtbl-kb-key rtbl-kb-f-lr">w</div><div class="rtbl-kb-key rtbl-kb-f-lm">e</div><div class="rtbl-kb-key rtbl-kb-f-li">r</div><div class="rtbl-kb-key rtbl-kb-f-li">t</div>
+              <div class="rtbl-kb-key rtbl-kb-f-ri">y</div><div class="rtbl-kb-key rtbl-kb-f-ri">u</div><div class="rtbl-kb-key rtbl-kb-f-rm">i</div><div class="rtbl-kb-key rtbl-kb-f-rr">o</div><div class="rtbl-kb-key rtbl-kb-f-rp">p</div>
+            </div>
+            <div class="rtbl-kb-row">
+              <div class="rtbl-kb-key rtbl-kb-f-lp">a</div><div class="rtbl-kb-key rtbl-kb-f-lr">s</div><div class="rtbl-kb-key rtbl-kb-f-lm">d</div><div class="rtbl-kb-key rtbl-kb-f-li">f</div><div class="rtbl-kb-key rtbl-kb-f-li">g</div>
+              <div class="rtbl-kb-key rtbl-kb-f-ri">h</div><div class="rtbl-kb-key rtbl-kb-f-ri">j</div><div class="rtbl-kb-key rtbl-kb-f-rm">k</div><div class="rtbl-kb-key rtbl-kb-f-rr">l</div>
+            </div>
+            <div class="rtbl-kb-row">
+              <div class="rtbl-kb-key rtbl-kb-f-lp">z</div><div class="rtbl-kb-key rtbl-kb-f-lr">x</div><div class="rtbl-kb-key rtbl-kb-f-lm">c</div><div class="rtbl-kb-key rtbl-kb-f-li">v</div><div class="rtbl-kb-key rtbl-kb-f-li">b</div>
+              <div class="rtbl-kb-key rtbl-kb-f-ri">n</div><div class="rtbl-kb-key rtbl-kb-f-ri">m</div>
+            </div>
+            <div class="rtbl-kb-row"><div class="rtbl-kb-key rtbl-kb-f-th rtbl-kb-space">space</div></div>
+          </div>
+          <div class="rtbl-kb-caption"><ruby>同<rt>おな</rt></ruby>じ<ruby>色<rt>いろ</rt></ruby>は<ruby>同<rt>おな</rt></ruby>じ<ruby>指<rt>ゆび</rt></ruby>で<ruby>打<rt>う</rt></ruby>つキーだよ</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="rtbl-footer">タイピング<ruby>練習<rt>れんしゅう</rt></ruby>アプリ「れんしゅう」「たんご」「ぶんしょう」で、このローマ<ruby>字<rt>じ</rt></ruby>を<ruby>使<rt>つか</rt></ruby>って<ruby>練習<rt>れんしゅう</rt></ruby>しよう!</p>
   </div>
 </div>
 
@@ -629,7 +963,14 @@ window.TypingCore = {
       '<path d="M50 26 C60 19 80 19 88 25 L88 79 C80 73 60 73 50 79 Z" fill="#ffcb73"/>' +
       '<line x1="50" y1="27" x2="50" y2="79" stroke="#e08e1d" stroke-width="2"/>' +
       '<path d="M20 35 h20 M20 43 h20 M20 51 h16" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity="0.9"/>' +
-      '<path d="M60 35 h20 M60 43 h20 M64 51 h16" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity="0.9"/></svg>'
+      '<path d="M60 35 h20 M60 43 h20 M64 51 h16" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity="0.9"/></svg>',
+    table:
+      '<svg viewBox="0 0 100 100"><rect x="18" y="10" width="64" height="80" rx="8" fill="#e2e8f0"/>' +
+      '<rect x="18" y="10" width="64" height="80" rx="8" fill="none" stroke="#94a3b8" stroke-width="2"/>' +
+      '<rect x="28" y="24" width="44" height="8" rx="2" fill="#64748b"/>' +
+      '<rect x="28" y="40" width="18" height="10" rx="2" fill="#3d8bf0"/><rect x="50" y="40" width="22" height="10" rx="2" fill="#f2569e"/>' +
+      '<rect x="28" y="54" width="18" height="10" rx="2" fill="#2fb583"/><rect x="50" y="54" width="22" height="10" rx="2" fill="#e0912f"/>' +
+      '<rect x="28" y="68" width="44" height="8" rx="2" fill="#cbd5e1"/></svg>'
   };
   function renderMascotIcons() {
     document.querySelectorAll('[data-icon]').forEach(function(el) {
@@ -773,7 +1114,13 @@ window.TypingCore = {
       if (mode === 'practice') { goTo('screen-practice'); startPractice(); }
       else if (mode === 'word') { goTo('screen-word'); startWord(); }
       else if (mode === 'sentence') { goTo('screen-sentence-levels'); }
+      else if (mode === 'romaji-table') { goTo('screen-romaji-table'); }
     });
+  });
+
+  document.getElementById('print-romaji-table-btn').addEventListener('click', function() {
+    playClick();
+    window.print();
   });
 
   // ---- Keyboard (shared render, used by practice screen) ----
