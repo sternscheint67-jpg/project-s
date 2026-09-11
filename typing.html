@@ -346,7 +346,6 @@ button:active { transform: scale(0.96); }
   </div>
   <div class="instruction-card">イカが<ruby>下<rt>した</rt></ruby>に<ruby>着<rt>つ</rt></ruby>く<ruby>前<rt>まえ</rt></ruby>に、ローマ<ruby>字<rt>じ</rt></ruby>で<ruby>退治<rt>たいじ</rt></ruby>しよう!<br>スペースを<ruby>押<rt>お</rt></ruby>してバーを<ruby>移動<rt>いどう</rt></ruby>しよう</div>
   <div class="stats-row">
-    <span>スコア <b id="word-score">0</b></span>
     <span>たおした<ruby>数<rt>かず</rt></ruby> <b id="word-defeated-count">0</b></span>
     <span><ruby>残<rt>のこ</rt></ruby>り <b id="word-lives">❤️❤️❤️</b></span>
   </div>
@@ -1294,7 +1293,6 @@ window.TypingCore = {
   var wordSelectedLane = 0;
   var wordNextId = 1;
   var wordLives = START_LIVES;
-  var wordScore = 0;
   var wordDefeated = 0;
   var wordStartTime = null;
   var wordKeyHandler = null;
@@ -1308,7 +1306,6 @@ window.TypingCore = {
     wordSelectedLane = 0;
     wordNextId = 1;
     wordLives = START_LIVES;
-    wordScore = 0;
     wordDefeated = 0;
     wordStartTime = Date.now();
     clearLaneSquids();
@@ -1354,7 +1351,6 @@ window.TypingCore = {
     return s;
   }
   function updateWordStats() {
-    document.getElementById('word-score').textContent = wordScore;
     document.getElementById('word-defeated-count').textContent = wordDefeated;
     document.getElementById('word-lives').textContent = heartsHtml(wordLives, START_LIVES);
   }
@@ -1416,7 +1412,6 @@ window.TypingCore = {
   function defeatOctopus(o) {
     wordOctopi = wordOctopi.filter(function(x) { return x.id !== o.id; });
     wordDefeated++;
-    wordScore += 10 + o.word.length * 3;
     updateWordStats();
     playComplete();
     o.el.classList.add('defeated');
@@ -1483,13 +1478,8 @@ window.TypingCore = {
     }
     setResultStats(
       '<span>たおした<ruby>数<rt>かず</rt></ruby>: <b>' + wordDefeated + '</b> <ruby>杯<rt>はい</rt></ruby></span>' +
-      '<span>スコア: <b>' + wordScore + '</b></span>' +
       '<span><ruby>生存<rt>せいぞん</rt></ruby><ruby>時間<rt>じかん</rt></ruby>: <b>' + survivalSec + '</b><ruby>秒<rt>びょう</rt></ruby></span>'
     );
-    if (!bestGrades.wordScore || wordScore > bestGrades.wordScore) {
-      bestGrades.wordScore = wordScore;
-      saveBestGrades();
-    }
     document.getElementById('result-overlay').hidden = false;
     resultRetryAction = function() { document.getElementById('result-overlay').hidden = true; goTo('screen-word'); startWord(); };
     resultBackAction = function() { document.getElementById('result-overlay').hidden = true; goTo('screen-home'); };
