@@ -82,7 +82,7 @@ button:active { transform: scale(0.96); }
 .settings-card { max-width:380px; margin:22px auto 0; background:var(--surface); border-radius:var(--radius-lg); padding:6px 18px; box-shadow:var(--shadow-card); }
 .settings-row { display:flex; align-items:center; justify-content:space-between; padding:13px 0; font-size:15px; }
 .settings-row:not(:last-child) { border-bottom:1px solid var(--hairline); }
-.ios-switch { width:50px; height:30px; border-radius:15px; background:var(--fill-quiet); border:none; position:relative; cursor:pointer; padding:0; flex-shrink:0; transition:background 180ms ease; }
+.ios-switch { width:50px; height:30px; border-radius:15px; background:#b0b0b8; border:none; position:relative; cursor:pointer; padding:0; flex-shrink:0; transition:background 180ms ease; }
 .ios-switch.on { background:var(--success); }
 .ios-switch-knob {
   position:absolute; top:2px; left:2px; width:26px; height:26px; border-radius:50%; background:#fff;
@@ -1288,6 +1288,7 @@ window.TypingCore = {
   // ---- Word screen: 3-lane falling squid typing game ----
   var LANE_COUNT = 3;
   var START_LIVES = 5;
+  var WORD_CLEAR_TARGET = 100;
   var wordActive = false;
   var wordOctopi = [];
   var wordSelectedLane = 0;
@@ -1421,6 +1422,11 @@ window.TypingCore = {
     o.el.classList.add('defeated');
     setTimeout(function() { removeOctopusEl(o); }, 240);
     refreshTargetVisuals();
+    if (wordDefeated >= WORD_CLEAR_TARGET) {
+      wordActive = false;
+      if (wordSpawnTimer) { clearTimeout(wordSpawnTimer); wordSpawnTimer = null; }
+      setTimeout(function() { endWordGame(true); }, 260);
+    }
   }
   function escapeOctopus(o) {
     wordOctopi = wordOctopi.filter(function(x) { return x.id !== o.id; });
@@ -1430,7 +1436,7 @@ window.TypingCore = {
     o.el.classList.add('escaped');
     setTimeout(function() { removeOctopusEl(o); }, 320);
     refreshTargetVisuals();
-    if (wordLives <= 0) endWordGame();
+    if (wordLives <= 0) endWordGame(false);
   }
   function tickFall(now) {
     if (!wordActive) return;
@@ -1465,11 +1471,16 @@ window.TypingCore = {
     renderOctopusWord(target);
     if (res.result === 'complete') defeatOctopus(target);
   }
-  function endWordGame() {
+  function endWordGame(cleared) {
     stopWord();
     var survivalSec = Math.round((Date.now() - wordStartTime) / 1000);
-    document.getElementById('result-title').innerHTML = '<ruby>単語<rt>たんご</rt></ruby>ゲーム しゅうりょう';
-    document.getElementById('result-grade').innerHTML = MASCOT_SVG.squid;
+    if (cleared) {
+      document.getElementById('result-title').innerHTML = WORD_CLEAR_TARGET + '<ruby>杯<rt>はい</rt></ruby>クリア!';
+      document.getElementById('result-grade').textContent = '🎉';
+    } else {
+      document.getElementById('result-title').innerHTML = '<ruby>単語<rt>たんご</rt></ruby>ゲーム しゅうりょう';
+      document.getElementById('result-grade').innerHTML = MASCOT_SVG.squid;
+    }
     setResultStats(
       '<span>たおした<ruby>数<rt>かず</rt></ruby>: <b>' + wordDefeated + '</b> <ruby>杯<rt>はい</rt></ruby></span>' +
       '<span>スコア: <b>' + wordScore + '</b></span>' +
