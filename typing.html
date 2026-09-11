@@ -1287,7 +1287,7 @@ window.TypingCore = {
 
   // ---- Word screen: 3-lane falling squid typing game ----
   var LANE_COUNT = 3;
-  var START_LIVES = 3;
+  var START_LIVES = 5;
   var wordActive = false;
   var wordOctopi = [];
   var wordSelectedLane = 0;
@@ -1359,13 +1359,13 @@ window.TypingCore = {
   }
   function scheduleSpawn() {
     if (!wordActive) return;
-    var delay = Math.max(900, 2600 - wordDefeated * 40);
+    var delay = Math.max(1200, 2600 - wordDefeated * 18);
     wordSpawnTimer = setTimeout(function() { spawnOctopus(); scheduleSpawn(); }, delay);
   }
   function pickLane() {
     var candidates = [];
     for (var l = 0; l < LANE_COUNT; l++) {
-      var crowded = wordOctopi.some(function(o) { return o.lane === l && o.y < 18; });
+      var crowded = wordOctopi.some(function(o) { return o.lane === l && o.y < 25; });
       if (!crowded) candidates.push(l);
     }
     if (!candidates.length) return -1;
@@ -1436,7 +1436,7 @@ window.TypingCore = {
     if (!wordActive) return;
     var dt = (now - wordLastFrameTime) / 1000;
     wordLastFrameTime = now;
-    var speed = Math.min(22, 6 + wordDefeated * 0.15);
+    var speed = Math.min(18, 5 + wordDefeated * 0.11);
     wordOctopi.slice().forEach(function(o) {
       o.y += speed * dt;
       if (o.y >= 92) {
