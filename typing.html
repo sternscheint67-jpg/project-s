@@ -50,7 +50,7 @@ button:active { transform: scale(0.96); }
   button:active { transform: none; }
 }
 
-.menu-btn, .settings-card, .instruction-card, .practice-stage, .level-btn, .sentence-card, .result-card, .cert-panel, .cert-output-wrap {
+.menu-btn, .settings-card, .instruction-card, .practice-stage, .level-btn, .sentence-card, .result-card, .cert-panel, .cert-output-wrap, .menu-extra-settings {
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
@@ -82,7 +82,27 @@ button:active { transform: scale(0.96); }
 .menu-label { flex:1; text-align:left; }
 .menu-chevron { color:var(--text-secondary); font-size:20px; opacity:0.45; font-weight:400; }
 
-.settings-card { max-width:380px; margin:22px auto 0; background:var(--surface); border-radius:var(--radius-lg); padding:6px 18px; box-shadow:var(--shadow-card); }
+.menu-columns { display:flex; gap:12px; max-width:420px; margin:0 auto; align-items:flex-start; }
+.menu-col { flex:1; min-width:0; display:flex; flex-direction:column; gap:10px; border-radius:var(--radius-lg); padding:12px 10px; }
+.menu-col-main { background:linear-gradient(180deg, rgba(0,113,227,0.16), rgba(0,113,227,0.05)); box-shadow:inset 0 0 0 1px rgba(0,113,227,0.14); }
+.menu-col-extra { background:var(--fill-quiet); box-shadow:inset 0 0 0 1px var(--hairline); }
+.menu-col-label { text-align:center; font-size:11px; font-weight:700; letter-spacing:0.04em; color:var(--text-secondary); padding-bottom:2px; }
+
+.menu-btn.menu-tile {
+  flex-direction:column; align-items:center; justify-content:center; gap:7px;
+  padding:14px 4px 12px; font-size:13px; text-align:center; white-space:normal; line-height:1.3;
+}
+.menu-tile .menu-icon-badge { width:40px; height:40px; border-radius:12px; }
+.menu-tile .menu-icon-badge svg { width:23px; height:23px; }
+.menu-col-extra .menu-btn.menu-tile { font-size:12px; }
+
+.menu-extra-settings { background:var(--surface); border-radius:var(--radius-md); padding:2px 12px; box-shadow:var(--shadow-card); }
+.menu-extra-settings-title { text-align:center; font-size:11px; font-weight:700; color:var(--text-secondary); padding:9px 0 3px; }
+.menu-extra-settings .settings-row { padding:8px 0; font-size:12px; }
+.menu-extra-settings .ios-switch { width:40px; height:24px; border-radius:12px; }
+.menu-extra-settings .ios-switch-knob { width:20px; height:20px; top:2px; left:2px; }
+.menu-extra-settings .ios-switch.on .ios-switch-knob { transform:translateX(16px); }
+
 .settings-row { display:flex; align-items:center; justify-content:space-between; padding:13px 0; font-size:15px; }
 .settings-row:not(:last-child) { border-bottom:1px solid var(--hairline); }
 .ios-switch { width:50px; height:30px; border-radius:15px; background:#b0b0b8; border:none; position:relative; cursor:pointer; padding:0; flex-shrink:0; transition:background 180ms ease; }
@@ -261,9 +281,11 @@ button:active { transform: scale(0.96); }
 .cert-timer.warning { color:var(--danger); }
 .cert-stats-row { font-size:15px; color:var(--text-secondary); margin-bottom:18px; }
 .cert-stats-row b { color:var(--text); font-variant-numeric:tabular-nums; font-size:19px; }
-.cert-output-wrap { background:var(--surface); border-radius:var(--radius-lg); padding:20px 22px; box-shadow:var(--shadow-card); min-height:200px; max-height:340px; overflow-y:auto; }
+.cert-output-wrap { background:var(--surface); border-radius:var(--radius-lg); padding:20px 22px; box-shadow:var(--shadow-card); min-height:200px; max-height:340px; overflow-y:auto; cursor:text; }
 .cert-output { font-size:20px; line-height:1.9; letter-spacing:0.02em; word-break:break-all; white-space:pre-wrap; color:var(--text); min-height:1.9em; }
-.cert-output:empty::before { content:'ここに入力した文字が表示されます'; color:var(--text-secondary); font-size:15px; }
+.cert-output.is-empty::before { content:'ここに入力した文字が表示されます'; color:var(--text-secondary); font-size:15px; }
+.cert-cursor { display:inline-block; width:2px; height:1.15em; background:var(--accent); vertical-align:text-bottom; margin:0 -1px; animation:cert-blink 1s steps(1) infinite; }
+@keyframes cert-blink { 50% { opacity:0; } }
 
 @media print {
   @page { size: A4 landscape; margin: 10mm; }
@@ -296,42 +318,41 @@ button:active { transform: scale(0.96); }
 
 <div id="screen-home" class="screen">
   <h1>タイピング<ruby>練習<rt>れんしゅう</rt></ruby></h1>
-  <div class="menu-list">
-    <button type="button" class="menu-btn practice" data-mode="practice">
-      <span class="menu-icon-badge badge-practice" data-icon="keyboard"></span>
-      <span class="menu-label"><ruby>練習<rt>れんしゅう</rt></ruby></span>
-      <span class="menu-chevron">›</span>
-    </button>
-    <button type="button" class="menu-btn word" data-mode="word">
-      <span class="menu-icon-badge badge-word" data-icon="squid"></span>
-      <span class="menu-label"><ruby>単語<rt>たんご</rt></ruby></span>
-      <span class="menu-chevron">›</span>
-    </button>
-    <button type="button" class="menu-btn sentence" data-mode="sentence">
-      <span class="menu-icon-badge badge-sentence" data-icon="book"></span>
-      <span class="menu-label"><ruby>文章<rt>ぶんしょう</rt></ruby></span>
-      <span class="menu-chevron">›</span>
-    </button>
-    <button type="button" class="menu-btn romaji-table" data-mode="romaji-table">
-      <span class="menu-icon-badge badge-romaji" data-icon="table"></span>
-      <span class="menu-label">ローマ<ruby>字表<rt>じひょう</rt></ruby></span>
-      <span class="menu-chevron">›</span>
-    </button>
-    <button type="button" class="menu-btn certification" data-mode="certification">
-      <span class="menu-icon-badge badge-certification" data-icon="clock"></span>
-      <span class="menu-label"><ruby>検定<rt>けんてい</rt></ruby><ruby>練習<rt>れんしゅう</rt></ruby></span>
-      <span class="menu-chevron">›</span>
-    </button>
-  </div>
-  <div class="settings-card">
-    <h2 style="text-align:center; padding-top:10px;"><ruby>設定<rt>せってい</rt></ruby></h2>
-    <div class="settings-row">
-      <span>BGM</span>
-      <button type="button" id="bgm-toggle" class="ios-switch" role="switch"><span class="ios-switch-knob"></span></button>
+  <div class="menu-columns">
+    <div class="menu-col menu-col-main">
+      <button type="button" class="menu-btn menu-tile practice" data-mode="practice">
+        <span class="menu-icon-badge badge-practice" data-icon="keyboard"></span>
+        <span class="menu-label"><ruby>練習<rt>れんしゅう</rt></ruby></span>
+      </button>
+      <button type="button" class="menu-btn menu-tile word" data-mode="word">
+        <span class="menu-icon-badge badge-word" data-icon="squid"></span>
+        <span class="menu-label"><ruby>単語<rt>たんご</rt></ruby></span>
+      </button>
+      <button type="button" class="menu-btn menu-tile sentence" data-mode="sentence">
+        <span class="menu-icon-badge badge-sentence" data-icon="book"></span>
+        <span class="menu-label"><ruby>文章<rt>ぶんしょう</rt></ruby></span>
+      </button>
     </div>
-    <div class="settings-row">
-      <span><ruby>効果音<rt>こうかおん</rt></ruby></span>
-      <button type="button" id="sfx-toggle" class="ios-switch" role="switch"><span class="ios-switch-knob"></span></button>
+    <div class="menu-col menu-col-extra">
+      <button type="button" class="menu-btn menu-tile romaji-table" data-mode="romaji-table">
+        <span class="menu-icon-badge badge-romaji" data-icon="table"></span>
+        <span class="menu-label">ローマ<ruby>字表<rt>じひょう</rt></ruby></span>
+      </button>
+      <button type="button" class="menu-btn menu-tile certification" data-mode="certification">
+        <span class="menu-icon-badge badge-certification" data-icon="clock"></span>
+        <span class="menu-label"><ruby>検定<rt>けんてい</rt></ruby><ruby>練習<rt>れんしゅう</rt></ruby></span>
+      </button>
+      <div class="menu-extra-settings">
+        <div class="menu-extra-settings-title"><ruby>設定<rt>せってい</rt></ruby></div>
+        <div class="settings-row">
+          <span>BGM</span>
+          <button type="button" id="bgm-toggle" class="ios-switch" role="switch"><span class="ios-switch-knob"></span></button>
+        </div>
+        <div class="settings-row">
+          <span><ruby>効果音<rt>こうかおん</rt></ruby></span>
+          <button type="button" id="sfx-toggle" class="ios-switch" role="switch"><span class="ios-switch-knob"></span></button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -675,7 +696,7 @@ button:active { transform: scale(0.96); }
     <button type="button" id="cert-start-btn" class="btn-primary">スタート</button>
     <button type="button" id="cert-stop-btn" class="btn-secondary" style="display:none">やめる</button>
   </div>
-  <div class="cert-output-wrap">
+  <div id="cert-output-wrap" class="cert-output-wrap">
     <div id="cert-output" class="cert-output"></div>
   </div>
 </div>
@@ -1715,6 +1736,7 @@ window.TypingCore = {
   var certRemaining = CERT_DURATION_SEC;
   var certBuffer = '';
   var certOutput = '';
+  var certCursorPos = 0;
   var certStartTime = null;
   var certInterval = null;
   var certKeyHandler = null;
@@ -1725,40 +1747,114 @@ window.TypingCore = {
     var s = t % 60;
     return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
   }
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
   function resetCertificationScreen() {
     certActive = false;
     certRemaining = CERT_DURATION_SEC;
     certBuffer = '';
     certOutput = '';
+    certCursorPos = 0;
     document.getElementById('cert-timer').textContent = formatMMSS(certRemaining);
     document.getElementById('cert-timer').classList.remove('warning');
     document.getElementById('cert-char-count').textContent = '0';
-    document.getElementById('cert-output').textContent = '';
+    renderCertOutput();
     document.getElementById('cert-start-btn').style.display = '';
     document.getElementById('cert-stop-btn').style.display = 'none';
   }
   function renderCertOutput() {
     var el = document.getElementById('cert-output');
-    el.textContent = certOutput;
+    if (certOutput.length === 0) {
+      el.innerHTML = '<span class="cert-cursor"></span>';
+      el.classList.add('is-empty');
+    } else {
+      var before = escapeHtml(certOutput.slice(0, certCursorPos));
+      var after = escapeHtml(certOutput.slice(certCursorPos));
+      el.innerHTML = before + '<span class="cert-cursor"></span>' + after;
+      el.classList.remove('is-empty');
+    }
     document.getElementById('cert-char-count').textContent = certOutput.length;
-    el.parentElement.scrollTop = el.parentElement.scrollHeight;
+    var cursorEl = el.querySelector('.cert-cursor');
+    if (cursorEl) cursorEl.scrollIntoView({ block: 'nearest' });
+  }
+  function certInsert(str) {
+    certOutput = certOutput.slice(0, certCursorPos) + str + certOutput.slice(certCursorPos);
+    certCursorPos += str.length;
+    renderCertOutput();
   }
   function certAppend(str) {
-    certOutput += str;
-    renderCertOutput();
+    certInsert(str);
   }
   function certBackspace() {
     if (certBuffer) { certBuffer = ''; return; }
-    if (certOutput.length) {
-      certOutput = certOutput.slice(0, -1);
+    if (certCursorPos > 0) {
+      certOutput = certOutput.slice(0, certCursorPos - 1) + certOutput.slice(certCursorPos);
+      certCursorPos--;
       renderCertOutput();
     }
   }
+  function certOutputClickOffset(clientX, clientY) {
+    var el = document.getElementById('cert-output');
+    var range = null;
+    if (document.caretRangeFromPoint) {
+      range = document.caretRangeFromPoint(clientX, clientY);
+    } else if (document.caretPositionFromPoint) {
+      var p = document.caretPositionFromPoint(clientX, clientY);
+      if (p) { range = document.createRange(); range.setStart(p.offsetNode, p.offset); }
+    }
+    if (!range) return null;
+    var container = range.startContainer;
+    var offset = range.startOffset;
+    if (container !== el && !el.contains(container)) return null;
+
+    function textLength(node) {
+      if (node.nodeType === Node.TEXT_NODE) return node.textContent.length;
+      if (node.classList && node.classList.contains('cert-cursor')) return 0;
+      var sum = 0;
+      for (var i = 0; i < node.childNodes.length; i++) sum += textLength(node.childNodes[i]);
+      return sum;
+    }
+    var total = 0;
+    var result = null;
+    (function visit(node) {
+      if (result !== null) return;
+      if (node === container) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          result = total + offset;
+        } else {
+          var kids = node.childNodes;
+          var acc = total;
+          for (var i = 0; i < offset && i < kids.length; i++) acc += textLength(kids[i]);
+          result = acc;
+        }
+        return;
+      }
+      if (node.nodeType === Node.TEXT_NODE) { total += node.textContent.length; return; }
+      if (node.classList && node.classList.contains('cert-cursor')) return;
+      for (var j = 0; j < node.childNodes.length; j++) {
+        visit(node.childNodes[j]);
+        if (result !== null) return;
+      }
+    })(el);
+    if (result === null) result = certOutput.length;
+    return Math.max(0, Math.min(certOutput.length, result));
+  }
+  document.getElementById('cert-output-wrap').addEventListener('click', function(e) {
+    if (!certActive) return;
+    var pos = certOutputClickOffset(e.clientX, e.clientY);
+    if (pos !== null) {
+      certCursorPos = pos;
+      certBuffer = '';
+      renderCertOutput();
+    }
+  });
   function startCertification() {
     certActive = true;
     certRemaining = CERT_DURATION_SEC;
     certBuffer = '';
     certOutput = '';
+    certCursorPos = 0;
     certStartTime = Date.now();
     renderCertOutput();
     document.getElementById('cert-timer').textContent = formatMMSS(certRemaining);
@@ -1774,12 +1870,13 @@ window.TypingCore = {
     certKeyHandler = function(e) {
       if (!certActive) return;
       if (e.key === 'Backspace') { e.preventDefault(); certBackspace(); return; }
-      if (e.key === ' ') { e.preventDefault(); certAppend(' '); return; }
-      if (/^[0-9]$/.test(e.key)) { certAppend(e.key); return; }
+      if (e.key === 'Enter') { e.preventDefault(); certBuffer = ''; certInsert('\n'); return; }
+      if (e.key === ' ') { e.preventDefault(); certInsert(' '); return; }
+      if (/^[0-9]$/.test(e.key)) { certInsert(e.key); return; }
       if (!/^[a-z.,!?/-]$/.test(e.key)) return;
       var res = Core.freeTypeStep(certBuffer, e.key);
       certBuffer = res.buffer;
-      if (res.output) certAppend(res.output);
+      if (res.output) certInsert(res.output);
     };
     document.addEventListener('keydown', certKeyHandler);
   }
