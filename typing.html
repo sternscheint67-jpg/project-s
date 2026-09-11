@@ -142,18 +142,20 @@ button:active { transform: scale(0.96); }
 .kb-row { display:flex; justify-content:center; gap:5px; margin-bottom:5px; }
 .kb-key {
   min-width:38px; height:38px; border-radius:8px; display:flex; align-items:center; justify-content:center;
-  font-size:14px; font-weight:700; color:#fff; opacity:0.55; transition:transform 80ms ease, opacity 80ms ease, box-shadow 80ms ease;
+  font-size:14px; font-weight:700; color:var(--text-secondary); background:var(--fill-quiet);
+  transition:transform 80ms ease, background 80ms ease, color 80ms ease, box-shadow 80ms ease;
 }
-.kb-key.active { opacity:1; transform:scale(1.12); box-shadow:0 0 0 3px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.25); }
+.kb-key.active { background:var(--finger-color); color:#fff; transform:scale(1.12); box-shadow:0 0 0 3px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.25); }
 .kb-key.space { min-width:200px; }
-.kb-f-lp { background:#e53e3e; } .kb-f-lr { background:#dd6b20; } .kb-f-lm { background:#d69e2e; } .kb-f-li { background:#38a169; }
-.kb-f-ri { background:#3182ce; } .kb-f-rm { background:#5a67d8; } .kb-f-rr { background:#805ad5; } .kb-f-rp { background:#d53f8c; }
-.kb-f-th { background:#718096; }
+.kb-f-lp { --finger-color:#e53e3e; } .kb-f-lr { --finger-color:#dd6b20; } .kb-f-lm { --finger-color:#d69e2e; } .kb-f-li { --finger-color:#38a169; }
+.kb-f-ri { --finger-color:#3182ce; } .kb-f-rm { --finger-color:#5a67d8; } .kb-f-rr { --finger-color:#805ad5; } .kb-f-rp { --finger-color:#d53f8c; }
+.kb-f-th { --finger-color:#718096; }
 
 .hands-row { display:flex; justify-content:center; align-items:flex-end; gap:44px; margin-top:12px; }
 .hand-block { display:flex; flex-direction:column; align-items:center; }
 .hand-fingers { display:flex; align-items:flex-end; gap:3px; }
-.hand-finger { width:13px; border-radius:7px 7px 4px 4px; }
+.hand-finger { width:13px; border-radius:7px 7px 4px 4px; background:var(--fill-quiet); transition:background 120ms ease, transform 120ms ease; }
+.hand-finger.active { background:var(--finger-color); transform:scale(1.12); }
 .hand-palm { width:84px; height:26px; border-radius:12px 12px 18px 18px; background:var(--fill-quiet); margin-top:-3px; }
 
 .result-overlay {
@@ -1253,6 +1255,12 @@ window.TypingCore = {
       el.classList.toggle('active', el.dataset.key === letter);
     });
   }
+  function highlightFinger(container, letter) {
+    var finger = Core.FINGER_MAP[letter];
+    container.querySelectorAll('.hand-finger').forEach(function(el) {
+      el.classList.toggle('active', !!finger && el.classList.contains('kb-f-' + finger));
+    });
+  }
   var HAND_LAYOUT = {
     left: [{ f: 'lp', h: 30 }, { f: 'lr', h: 42 }, { f: 'lm', h: 50 }, { f: 'li', h: 42 }, { f: 'th', h: 24 }],
     right: [{ f: 'th', h: 24 }, { f: 'ri', h: 42 }, { f: 'rm', h: 50 }, { f: 'rr', h: 42 }, { f: 'rp', h: 30 }]
@@ -1332,9 +1340,15 @@ window.TypingCore = {
   }
   function updatePracticeKeyboardHighlight() {
     var chunk = practiceSession.chunks[practiceSession.index];
-    if (!chunk) { highlightKey(document.getElementById('practice-keyboard'), ''); return; }
+    if (!chunk) {
+      highlightKey(document.getElementById('practice-keyboard'), '');
+      highlightFinger(document.getElementById('hands-row'), '');
+      return;
+    }
     var remaining = chunk.options[0].slice(practiceSession.buffer.length);
-    highlightKey(document.getElementById('practice-keyboard'), remaining.charAt(0) || '');
+    var letter = remaining.charAt(0) || '';
+    highlightKey(document.getElementById('practice-keyboard'), letter);
+    highlightFinger(document.getElementById('hands-row'), letter);
   }
   function handlePracticeKeystroke(letter) {
     var charIndex = practiceSession.index;
