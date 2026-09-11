@@ -670,7 +670,7 @@ var ROMAJI_TABLE = {
   'ま':['ma'],'み':['mi'],'む':['mu'],'め':['me'],'も':['mo'],
   'や':['ya'],'ゆ':['yu'],'よ':['yo'],
   'ら':['ra'],'り':['ri'],'る':['ru'],'れ':['re'],'ろ':['ro'],
-  'わ':['wa'],'を':['wo'],'ん':['nn','n'],
+  'わ':['wa'],'を':['wo'],'ん':['nn'],
   'が':['ga'],'ぎ':['gi'],'ぐ':['gu'],'げ':['ge'],'ご':['go'],
   'ざ':['za'],'じ':['ji','zi'],'ず':['zu'],'ぜ':['ze'],'ぞ':['zo'],
   'だ':['da'],'ぢ':['ji','di'],'づ':['zu','du'],'で':['de'],'ど':['do'],
@@ -743,13 +743,11 @@ function buildChunks(text) {
       }
       chunks[idx].options = [consonant, 'ltu', 'xtu', 'ltsu', 'xtsu'];
     } else if (chunks[idx].type === 'kana' && chunks[idx].kana === 'ん') {
-      var next2 = chunks[idx + 1];
-      var needsNN = false;
-      if (next2 && next2.type === 'kana') {
-        var first = next2.options[0].charAt(0);
-        if ('aiueoyn'.indexOf(first) !== -1) needsNN = true;
-      }
-      chunks[idx].options = needsNN ? ['nn'] : ['nn', 'n'];
+      // Always require "nn": accepting a lone "n" too would create a prefix
+      // collision (handleKey completes on the shorter match after just one
+      // keystroke, so a second "n" meant to finish "nn" leaks into the next
+      // chunk and registers as a miss).
+      chunks[idx].options = ['nn'];
     }
   }
   return chunks;
@@ -813,7 +811,16 @@ function gradeSession(session) {
 var WORD_LIST = ['おかし','えがお','さいふ','ねこ','いぬ','つくえ','きって','でんわ','ほん','くるま',
   'さくら','たまご','みかん','りんご','すいか','がっこう','せんせい','ともだち','おんがく','きょうしつ',
   'ひこうき','でんしゃ','じてんしゃ','ゆうびん','としょかん','こうえん','びょういん','たいよう','つき','ほし',
-  'あめ','ゆき','かぜ','はな','とけい','かばん','めがね','しんぶん','にんじん','きゅうり'];
+  'あめ','ゆき','かぜ','はな','とけい','かばん','めがね','しんぶん','にんじん','きゅうり',
+  'うさぎ','ぞう','きりん','とら','くま','さる','ねずみ','かめ','かえる','らいおん','ぶた','にわとり',
+  'おにぎり','ぱん','やさい','くだもの','ぎゅうにゅう','からあげ','うどん','おちゃ','とまと','にく','さかな','たこやき',
+  'おじいさん','おばあさん','あかちゃん',
+  'えんぴつ','けしごむ','じょうぎ','らんどせる','こくばん','いす','かさ','ぼうし',
+  'そら','うみ','やま','もり','くも','にじ','かわ',
+  'じどうしゃ','ばす','ふね',
+  'つみき','たこ','こま','にんぎょう','ぶらんこ',
+  'みみ','くち','あし','かお',
+  'あか','あお','きいろ','みどり','くろ','しろ'];
 
 function randomWord() {
   return WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
