@@ -123,14 +123,6 @@ button:active { transform: scale(0.96); }
 .practice-row .ch.current { color:var(--accent); }
 .practice-row .ch.flash-ok { color:var(--success); }
 .practice-row .ch.flash-ng { color:var(--danger); }
-.speech-bubble {
-  position:relative; background:var(--fill-quiet); color:var(--text); border-radius:14px; padding:10px 14px;
-  max-width:210px; font-size:13px; line-height:1.5; text-align:left;
-}
-.speech-bubble::before {
-  content:''; position:absolute; left:-8px; top:50%; transform:translateY(-50%);
-  border-width:7px 9px 7px 0; border-style:solid; border-color:transparent var(--fill-quiet) transparent transparent;
-}
 .practice-romaji-hint { margin-top:6px; font-size:16px; letter-spacing:0.1em; color:var(--text-secondary); font-variant-numeric:tabular-nums; }
 .rep-bar { display:flex; justify-content:center; gap:4px; margin-top:12px; }
 .rep-seg { width:20px; height:7px; border-radius:4px; background:var(--fill-quiet); transition:background 120ms ease; }
@@ -303,8 +295,6 @@ button:active { transform: scale(0.96); }
   body { padding:14px; }
   .practice-row { font-size:34px; }
   .practice-row-wrap { gap:10px; }
-  .speech-bubble { max-width:160px; font-size:12px; }
-  .speech-bubble::before { left:auto; top:-8px; right:50%; transform:translateX(50%) rotate(90deg); }
   .kb-key { min-width:26px; height:32px; font-size:11px; }
   .kb-key.space { min-width:120px; }
   .hands-row { gap:26px; }
@@ -368,7 +358,6 @@ button:active { transform: scale(0.96); }
   <div class="practice-stage">
     <div class="practice-row-wrap">
       <div id="practice-row" class="practice-row">あいうえお</div>
-      <div class="speech-bubble">「<ruby>手元<rt>てもと</rt></ruby>を<ruby>見<rt>み</rt></ruby>ないで<ruby>打<rt>う</rt></ruby>とう!」</div>
     </div>
     <div id="practice-romaji-hint" class="practice-romaji-hint">a</div>
     <div id="rep-bar" class="rep-bar"></div>
