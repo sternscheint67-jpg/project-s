@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="color-scheme" content="light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="タイピング練習">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>タイピング練習</title>
 <style>
 :root {
+  color-scheme: light;
   --bg: #f5f5f7;
   --surface: rgba(255,255,255,0.78);
   --surface-solid: #ffffff;
@@ -42,7 +44,7 @@ body {
 h1 { text-align:center; font-size:26px; font-weight:700; letter-spacing:-0.01em; margin:8px 0 6px; }
 h2 { font-size:17px; font-weight:600; letter-spacing:-0.01em; margin:0 0 12px; }
 
-button { font-family: inherit; -webkit-tap-highlight-color: transparent; transition: transform 140ms cubic-bezier(0.2,0.8,0.2,1), box-shadow 140ms ease, filter 140ms ease; }
+button { font-family: inherit; -webkit-appearance: none; appearance: none; color-scheme: light; -webkit-tap-highlight-color: transparent; transition: transform 140ms cubic-bezier(0.2,0.8,0.2,1), box-shadow 140ms ease, filter 140ms ease; }
 button:active { transform: scale(0.96); }
 @media (prefers-reduced-motion: reduce) {
   button:active { transform: none; }
