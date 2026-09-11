@@ -279,6 +279,8 @@ button:active { transform: scale(0.96); }
 .cert-output { font-size:20px; line-height:1.9; letter-spacing:0.02em; word-break:break-all; white-space:pre-wrap; color:var(--text); min-height:1.9em; }
 .cert-output.is-empty::before { content:'ここに入力した文字が表示されます'; color:var(--text-secondary); font-size:15px; }
 .cert-cursor { display:inline-block; width:2px; height:1.15em; background:var(--accent); vertical-align:text-bottom; margin:0 -1px; animation:cert-blink 1s steps(1) infinite; }
+.cert-composing { text-decoration:underline; text-decoration-color:var(--accent); text-decoration-thickness:2px; text-underline-offset:3px; }
+.cert-candidate { background:rgba(0,113,227,0.22); border-radius:3px; box-shadow:0 0 0 1px rgba(0,113,227,0.35); }
 @keyframes cert-blink { 50% { opacity:0; } }
 
 @media print {
@@ -680,7 +682,7 @@ button:active { transform: scale(0.96); }
     <h1><ruby>検定<rt>けんてい</rt></ruby><ruby>練習<rt>れんしゅう</rt></ruby></h1>
     <span class="header-spacer"></span>
   </div>
-  <div class="instruction-card"><ruby>紙<rt>かみ</rt></ruby>の<ruby>文章<rt>ぶんしょう</rt></ruby>を<ruby>見<rt>み</rt></ruby>ながら、20<ruby>分間<rt>ふんかん</rt></ruby>でたくさん<ruby>打<rt>う</rt></ruby>とう!</div>
+  <div class="instruction-card"><ruby>紙<rt>かみ</rt></ruby>の<ruby>文章<rt>ぶんしょう</rt></ruby>を<ruby>見<rt>み</rt></ruby>ながら、20<ruby>分間<rt>ふんかん</rt></ruby>でたくさん<ruby>打<rt>う</rt></ruby>とう!<br><span style="font-size:12px;">スペースキーで<ruby>漢字<rt>かんじ</rt></ruby>やカタカナに<ruby>変換<rt>へんかん</rt></ruby>、Enterで<ruby>確定<rt>かくてい</rt></ruby></span></div>
   <div class="cert-panel">
     <div id="cert-timer" class="cert-timer">20:00</div>
     <div class="cert-stats-row"><ruby>文字数<rt>もじすう</rt></ruby> <b id="cert-char-count">0</b></div>
@@ -978,6 +980,67 @@ function freeTypeStep(buffer, letter) {
   return { buffer: fresh.buffer, output: fresh.output };
 }
 
+function hiraganaToKatakana(str) {
+  return str.replace(/[ぁ-ゖ]/g, function(ch) {
+    return String.fromCharCode(ch.charCodeAt(0) + 0x60);
+  });
+}
+
+// Small built-in conversion dictionary for the certification mode's
+// kana-to-kanji henkan (space to convert, like a real IME). This only
+// covers common everyday words, not every word a printed passage might use.
+var KANJI_DICT = {
+  きょう:['今日'], あした:['明日'], あす:['明日'], きのう:['昨日'], おととい:['一昨日'],
+  いま:['今'], あさ:['朝'], ひる:['昼'], よる:['夜'], ばん:['晩'],
+  まいにち:['毎日'], まいあさ:['毎朝'], まいばん:['毎晩'], しゅう:['週'], らいしゅう:['来週'],
+  せんしゅう:['先週'], こんしゅう:['今週'], つき:['月'], としゅう:['年'], とし:['年'],
+  らいねん:['来年'], きょねん:['去年'], ことし:['今年'], じかん:['時間'], ふん:['分'],
+  びょう:['秒'], げつようび:['月曜日'], かようび:['火曜日'], すいようび:['水曜日'], もくようび:['木曜日'],
+  きんようび:['金曜日'], どようび:['土曜日'], にちようび:['日曜日'],
+  いち:['一'], に:['二'], さん:['三'], よん:['四'], し:['四'],
+  ご:['五'], ろく:['六'], なな:['七'], しち:['七'], はち:['八'],
+  きゅう:['九'], く:['九'], じゅう:['十'], ひゃく:['百'], せん:['千'], まん:['万'],
+  がっこう:['学校'], せんせい:['先生'], がくせい:['学生'], かいしゃ:['会社'], しごと:['仕事'],
+  でんわ:['電話'], けいたい:['携帯'], でんしゃ:['電車'], くるま:['車'], じどうしゃ:['自動車'],
+  みち:['道'], えき:['駅'], くうこう:['空港'], びょういん:['病院'], ぎんこう:['銀行'],
+  ゆうびんきょく:['郵便局'], としょかん:['図書館'], こうえん:['公園'], いえ:['家'], うち:['家'],
+  へや:['部屋'], かぎ:['鍵'], つくえ:['机'], いす:['椅子'], ほん:['本'],
+  しんぶん:['新聞'], ざっし:['雑誌'], てがみ:['手紙'], にっき:['日記'], しゃしん:['写真'],
+  えいが:['映画'], おんがく:['音楽'], うた:['歌'], え:['絵'], りょうり:['料理'],
+  たべもの:['食べ物'], のみもの:['飲み物'], みず:['水'], ごはん:['ご飯'], あさごはん:['朝ご飯'],
+  ひるごはん:['昼ご飯'], ばんごはん:['晩ご飯'], やさい:['野菜'], くだもの:['果物'], にく:['肉'],
+  さかな:['魚'], たまご:['卵'],
+  いく:['行く'], くる:['来る'], かえる:['帰る','変える'], たべる:['食べる'], のむ:['飲む'],
+  みる:['見る'], きく:['聞く','聴く'], はなす:['話す'], いう:['言う'], よむ:['読む'],
+  かく:['書く'], つくる:['作る'], うる:['売る'], かう:['買う'], つかう:['使う'],
+  もつ:['持つ'], まつ:['待つ'], あるく:['歩く'], はしる:['走る'], およぐ:['泳ぐ'],
+  ねる:['寝る'], おきる:['起きる'], はたらく:['働く'], やすむ:['休む'], あそぶ:['遊ぶ'],
+  おもう:['思う'], かんがえる:['考える'], わかる:['分かる'], しる:['知る'],
+  はじめる:['始める'], おわる:['終わる'], つづける:['続ける'], あける:['開ける'], しめる:['閉める'],
+  あがる:['上がる'], さがる:['下がる'], のぼる:['登る'], おりる:['降りる'],
+  おおきい:['大きい'], ちいさい:['小さい'], たかい:['高い'], やすい:['安い'],
+  あたらしい:['新しい'], ふるい:['古い'], あかるい:['明るい'], くらい:['暗い'],
+  はやい:['早い','速い'], おそい:['遅い'], ながい:['長い'], みじかい:['短い'],
+  おおい:['多い'], すくない:['少ない'], つよい:['強い'], よわい:['弱い'],
+  いい:['良い'], よい:['良い'], わるい:['悪い'], あつい:['暑い','熱い'], さむい:['寒い'],
+  あたたかい:['暖かい','温かい'], すずしい:['涼しい'], うつくしい:['美しい'],
+  たのしい:['楽しい'], うれしい:['嬉しい'], かなしい:['悲しい'], おもしろい:['面白い'],
+  みぎ:['右'], ひだり:['左'], うえ:['上'], した:['下'], まえ:['前'],
+  うしろ:['後ろ'], なか:['中'], そと:['外'], ひがし:['東'], にし:['西'],
+  みなみ:['南'], きた:['北'], ちかく:['近く'], とおく:['遠く'],
+  かぞく:['家族'], ちち:['父'], はは:['母'], あに:['兄'], あね:['姉'],
+  おとうと:['弟'], いもうと:['妹'], こども:['子供'], おとな:['大人'], ともだち:['友達'],
+  あたま:['頭'], かお:['顔'], め:['目'], みみ:['耳'], はな:['花','鼻'],
+  くち:['口'], て:['手'], あし:['足'], からだ:['体'], こころ:['心'],
+  てんき:['天気'], あめ:['雨'], ゆき:['雪'], かぜ:['風'], そら:['空'],
+  たいよう:['太陽'], ほし:['星'], うみ:['海'], やま:['山'], かわ:['川'],
+  もり:['森'], き:['木'],
+  べんきょう:['勉強'], しゅくだい:['宿題'], しけん:['試験'], もんだい:['問題'], こたえ:['答え'],
+  しつもん:['質問'], せつめい:['説明'], れんしゅう:['練習'], かいぎ:['会議'], やくそく:['約束'],
+  よてい:['予定'], けいかく:['計画'], もくてき:['目的'], りゆう:['理由'], げんいん:['原因'],
+  けっか:['結果'], ほうほう:['方法'], おねがいします:['お願いします']
+};
+
 var FINGER_MAP = {
   q:'lp', w:'lr', e:'lm', r:'li', t:'li', y:'ri', u:'ri', i:'rm', o:'rr', p:'rp',
   a:'lp', s:'lr', d:'lm', f:'li', g:'li', h:'ri', j:'ri', k:'rm', l:'rr',
@@ -1013,6 +1076,8 @@ window.TypingCore = {
   buildSegmentMap: buildSegmentMap,
   buildLevelSegments: buildLevelSegments,
   freeTypeStep: freeTypeStep,
+  toKatakana: hiraganaToKatakana,
+  KANJI_DICT: KANJI_DICT,
   LEVELS: LEVELS,
   FINGER_MAP: FINGER_MAP,
   KEYBOARD_ROWS: KEYBOARD_ROWS,
@@ -1740,6 +1805,10 @@ window.TypingCore = {
   var certBuffer = '';
   var certOutput = '';
   var certCursorPos = 0;
+  var certReading = '';
+  var certState = 'idle'; // 'idle' | 'composing' | 'converting'
+  var certCandidates = [];
+  var certCandidateIndex = 0;
   var certStartTime = null;
   var certInterval = null;
   var certKeyHandler = null;
@@ -1759,6 +1828,10 @@ window.TypingCore = {
     certBuffer = '';
     certOutput = '';
     certCursorPos = 0;
+    certReading = '';
+    certState = 'idle';
+    certCandidates = [];
+    certCandidateIndex = 0;
     document.getElementById('cert-timer').textContent = formatMMSS(certRemaining);
     document.getElementById('cert-timer').classList.remove('warning');
     document.getElementById('cert-char-count').textContent = '0';
@@ -1768,13 +1841,19 @@ window.TypingCore = {
   }
   function renderCertOutput() {
     var el = document.getElementById('cert-output');
-    if (certOutput.length === 0) {
+    var compositionText = certState === 'converting' ? certCandidates[certCandidateIndex] : certReading;
+    if (certOutput.length === 0 && !compositionText) {
       el.innerHTML = '<span class="cert-cursor"></span>';
       el.classList.add('is-empty');
     } else {
       var before = escapeHtml(certOutput.slice(0, certCursorPos));
       var after = escapeHtml(certOutput.slice(certCursorPos));
-      el.innerHTML = before + '<span class="cert-cursor"></span>' + after;
+      var compHtml = '';
+      if (compositionText) {
+        var cls = certState === 'converting' ? 'cert-candidate' : 'cert-composing';
+        compHtml = '<span class="' + cls + '">' + escapeHtml(compositionText) + '</span>';
+      }
+      el.innerHTML = before + compHtml + '<span class="cert-cursor"></span>' + after;
       el.classList.remove('is-empty');
     }
     document.getElementById('cert-char-count').textContent = certOutput.length;
@@ -1789,8 +1868,56 @@ window.TypingCore = {
   function certAppend(str) {
     certInsert(str);
   }
+  function certCommitComposition() {
+    if (certState === 'idle') return;
+    var text = certState === 'converting' ? certCandidates[certCandidateIndex] : certReading;
+    certState = 'idle';
+    certReading = '';
+    certCandidates = [];
+    certCandidateIndex = 0;
+    if (text) certInsert(text);
+    else renderCertOutput();
+  }
+  function certBuildCandidates(reading) {
+    var candidates = [];
+    var kanjiList = Core.KANJI_DICT[reading];
+    if (kanjiList) candidates = candidates.concat(kanjiList);
+    var katakana = Core.toKatakana(reading);
+    if (candidates.indexOf(katakana) === -1) candidates.push(katakana);
+    if (candidates.indexOf(reading) === -1) candidates.push(reading);
+    return candidates;
+  }
+  function certHandleSpace() {
+    if (certState === 'idle') { certInsert(' '); return; }
+    if (certState === 'composing') {
+      certCandidates = certBuildCandidates(certReading);
+      certCandidateIndex = 0;
+      certState = 'converting';
+      renderCertOutput();
+      return;
+    }
+    certCandidateIndex = (certCandidateIndex + 1) % certCandidates.length;
+    renderCertOutput();
+  }
+  function certHandleEnter() {
+    if (certState === 'idle') { certInsert('\n'); return; }
+    certCommitComposition();
+  }
   function certBackspace() {
     if (certBuffer) { certBuffer = ''; return; }
+    if (certState === 'converting') {
+      certState = 'composing';
+      certCandidates = [];
+      certCandidateIndex = 0;
+      renderCertOutput();
+      return;
+    }
+    if (certState === 'composing' && certReading.length > 0) {
+      certReading = certReading.slice(0, -1);
+      if (certReading.length === 0) certState = 'idle';
+      renderCertOutput();
+      return;
+    }
     if (certCursorPos > 0) {
       certOutput = certOutput.slice(0, certCursorPos - 1) + certOutput.slice(certCursorPos);
       certCursorPos--;
@@ -1845,6 +1972,7 @@ window.TypingCore = {
   }
   document.getElementById('cert-output-wrap').addEventListener('click', function(e) {
     if (!certActive) return;
+    certCommitComposition();
     var pos = certOutputClickOffset(e.clientX, e.clientY);
     if (pos !== null) {
       certCursorPos = pos;
@@ -1858,6 +1986,10 @@ window.TypingCore = {
     certBuffer = '';
     certOutput = '';
     certCursorPos = 0;
+    certReading = '';
+    certState = 'idle';
+    certCandidates = [];
+    certCandidateIndex = 0;
     certStartTime = Date.now();
     renderCertOutput();
     document.getElementById('cert-timer').textContent = formatMMSS(certRemaining);
@@ -1873,13 +2005,23 @@ window.TypingCore = {
     certKeyHandler = function(e) {
       if (!certActive) return;
       if (e.key === 'Backspace') { e.preventDefault(); certBackspace(); return; }
-      if (e.key === 'Enter') { e.preventDefault(); certBuffer = ''; certInsert('\n'); return; }
-      if (e.key === ' ') { e.preventDefault(); certInsert(' '); return; }
-      if (/^[0-9]$/.test(e.key)) { certInsert(e.key); return; }
+      if (e.key === 'Enter') { e.preventDefault(); certHandleEnter(); return; }
+      if (e.key === ' ') { e.preventDefault(); certHandleSpace(); return; }
+      if (/^[0-9]$/.test(e.key)) { certCommitComposition(); certInsert(e.key); return; }
       if (!/^[a-z.,!?/-]$/.test(e.key)) return;
+      if (certState === 'converting') certCommitComposition();
       var res = Core.freeTypeStep(certBuffer, e.key);
       certBuffer = res.buffer;
-      if (res.output) certInsert(res.output);
+      if (res.output) {
+        if (/^[ぁ-ゖ]+$/.test(res.output)) {
+          certReading += res.output;
+          certState = 'composing';
+          renderCertOutput();
+        } else {
+          certCommitComposition();
+          certInsert(res.output);
+        }
+      }
     };
     document.addEventListener('keydown', certKeyHandler);
   }
@@ -1889,6 +2031,7 @@ window.TypingCore = {
     certActive = false;
   }
   function finishCertification() {
+    certCommitComposition();
     var elapsedSec = Math.round((Date.now() - certStartTime) / 1000);
     stopCertification();
     document.getElementById('cert-start-btn').style.display = '';
