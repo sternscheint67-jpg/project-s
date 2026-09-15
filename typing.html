@@ -37,7 +37,6 @@ body {
   margin: 0;
   padding: 24px;
   -webkit-font-smoothing: antialiased;
-  outline: none;
 }
 
 .screen { max-width: 900px; margin: 0 auto; }
@@ -51,7 +50,7 @@ button:active { transform: scale(0.96); }
   button:active { transform: none; }
 }
 
-.menu-btn, .settings-card, .instruction-card, .practice-stage, .level-btn, .sentence-card, .result-card, .cert-panel, .cert-output, .menu-extra-settings {
+.menu-btn, .instruction-card, .practice-stage, .level-btn, .sentence-card, .result-card, .cert-panel, .cert-output {
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
@@ -97,26 +96,6 @@ button:active { transform: scale(0.96); }
 .menu-tile .menu-icon-badge svg { width:23px; height:23px; }
 .menu-col-extra .menu-btn.menu-tile { font-size:12px; }
 
-.menu-extra-settings { background:var(--surface); border-radius:var(--radius-md); padding:2px 12px; box-shadow:var(--shadow-card); }
-.menu-extra-settings-title { text-align:center; font-size:11px; font-weight:700; color:var(--text-secondary); padding:9px 0 3px; }
-.menu-extra-settings .settings-row { padding:8px 0; font-size:12px; }
-.menu-extra-settings .ios-switch { width:40px; height:24px; border-radius:12px; }
-.menu-extra-settings .ios-switch-track { border-radius:12px; }
-.menu-extra-settings .ios-switch-knob { width:20px; height:20px; top:2px; left:2px; }
-.menu-extra-settings .ios-switch.on .ios-switch-knob { transform:translateX(16px); }
-
-.settings-row { display:flex; align-items:center; justify-content:space-between; padding:13px 0; font-size:15px; }
-.settings-row:not(:last-child) { border-bottom:1px solid var(--hairline); }
-.ios-switch { width:50px; height:30px; border-radius:15px; background:none; border:none; position:relative; cursor:pointer; padding:0; flex-shrink:0; }
-.ios-switch-track {
-  position:absolute; inset:0; border-radius:15px; background:#86868b; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.12); transition:background 180ms ease; pointer-events:none;
-}
-.ios-switch.on .ios-switch-track { background:var(--success); }
-.ios-switch-knob {
-  position:absolute; top:2px; left:2px; width:26px; height:26px; border-radius:50%; background:#fff;
-  box-shadow:0 3px 6px rgba(0,0,0,0.25); transition:transform 220ms cubic-bezier(0.34,1.56,0.64,1); pointer-events:none;
-}
-.ios-switch.on .ios-switch-knob { transform:translateX(20px); }
 
 .instruction-card { background:var(--surface); border-radius:var(--radius-lg); padding:16px 20px; box-shadow:var(--shadow-card); margin-bottom:18px; text-align:center; font-size:14px; line-height:1.9; color:var(--text-secondary); }
 
@@ -314,7 +293,9 @@ button:active { transform: scale(0.96); }
 }
 </style>
 </head>
-<body tabindex="-1">
+<body>
+
+<input id="hw-keyboard-catcher" type="text" inputmode="none" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="-1" aria-hidden="true" style="position:fixed; top:0; left:0; width:1px; height:1px; opacity:0; border:none; padding:0; margin:0; pointer-events:none;">
 
 <div id="screen-home" class="screen">
   <h1>タイピング<ruby>練習<rt>れんしゅう</rt></ruby></h1>
@@ -342,13 +323,6 @@ button:active { transform: scale(0.96); }
         <span class="menu-icon-badge badge-certification" data-icon="clock"></span>
         <span class="menu-label"><ruby>検定<rt>けんてい</rt></ruby><ruby>練習<rt>れんしゅう</rt></ruby></span>
       </button>
-      <div class="menu-extra-settings">
-        <div class="menu-extra-settings-title"><ruby>設定<rt>せってい</rt></ruby></div>
-        <div class="settings-row">
-          <span>BGM</span>
-          <button type="button" id="bgm-toggle" class="ios-switch" role="switch"><span class="ios-switch-track"></span><span class="ios-switch-knob"></span></button>
-        </div>
-      </div>
     </div>
   </div>
 </div>
@@ -1041,18 +1015,7 @@ window.TypingCore = {
   }
   renderMascotIcons();
 
-  var settings = loadSettings();
   var bestGrades = loadBestGrades();
-
-  function loadSettings() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return { bgmOn: false };
-      var parsed = JSON.parse(raw);
-      return { bgmOn: parsed.bgmOn === true };
-    } catch (e) { return { bgmOn: false }; }
-  }
-  function saveSettings() { localStorage.setItem(STORAGE_KEY, JSON.stringify(settings)); }
 
   function loadBestGrades() {
     try {
@@ -1065,6 +1028,18 @@ window.TypingCore = {
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(function(el) { el.style.display = 'none'; });
     document.getElementById(id).style.display = 'block';
+  }
+
+  // iPadOS Safari can fail to dispatch keydown from an attached hardware
+  // keyboard at all unless a real text-editing element holds focus (the
+  // <body> itself doesn't reliably count). This hidden, always-empty input
+  // (inputmode="none" keeps the on-screen keyboard from popping up on
+  // touch-only iPads) keeps practice/word/sentence responsive to a
+  // hardware keyboard without being visible or interactive itself.
+  var hwKeyboardCatcher = document.getElementById('hw-keyboard-catcher');
+  hwKeyboardCatcher.addEventListener('input', function() { hwKeyboardCatcher.value = ''; });
+  function focusHardwareKeyboardCatcher() {
+    hwKeyboardCatcher.focus({ preventScroll: true });
   }
 
   var audioCtx = null;
@@ -1104,42 +1079,6 @@ window.TypingCore = {
     });
   }
 
-  var BGM_PATTERNS = {
-    'screen-home': { notes: [261.63, 329.63, 392.00, 329.63], tempo: 650 },
-    'screen-practice': { notes: [293.66, 349.23, 440.00, 349.23], tempo: 500 },
-    'screen-word': { notes: [329.63, 392.00, 493.88, 392.00], tempo: 340 },
-    'screen-sentence-levels': { notes: [261.63, 329.63, 392.00, 329.63], tempo: 650 },
-    'screen-sentence': { notes: [246.94, 293.66, 349.23, 293.66], tempo: 560 }
-  };
-  var bgmTimer = null;
-  var bgmIndex = 0;
-  function stopBGM() { if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; } }
-  function startBGM(screenId) {
-    stopBGM();
-    if (!settings.bgmOn) return;
-    var pattern = BGM_PATTERNS[screenId];
-    if (!pattern) return;
-    bgmIndex = 0;
-    bgmTimer = setInterval(function() {
-      playTone(pattern.notes[bgmIndex % pattern.notes.length], 0.05, pattern.tempo * 0.75);
-      bgmIndex++;
-    }, pattern.tempo);
-  }
-
-  function renderSettingsToggles() {
-    var bgmBtn = document.getElementById('bgm-toggle');
-    bgmBtn.className = 'ios-switch' + (settings.bgmOn ? ' on' : '');
-    bgmBtn.setAttribute('aria-checked', String(settings.bgmOn));
-  }
-  renderSettingsToggles();
-
-  document.getElementById('bgm-toggle').addEventListener('click', function() {
-    settings.bgmOn = !settings.bgmOn;
-    saveSettings();
-    renderSettingsToggles();
-    startBGM('screen-home');
-  });
-
   document.querySelectorAll('.back-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       playClick();
@@ -1153,15 +1092,9 @@ window.TypingCore = {
     stopSentence();
     stopCertification();
     showScreen(screenId);
-    startBGM(screenId);
     if (screenId === 'screen-sentence-levels') renderLevelList();
     if (screenId === 'screen-certification') resetCertificationScreen();
-    // iPadOS Safari can fail to dispatch keydown from an attached hardware
-    // keyboard to the page at all unless some element currently holds
-    // focus (the body itself doesn't reliably count). Focusing an
-    // invisible, non-tab-reachable element keeps keyboard-driven screens
-    // (practice/word/sentence) responsive when a keyboard is attached.
-    if (document.body.focus) document.body.focus({ preventScroll: true });
+    else focusHardwareKeyboardCatcher();
   }
 
   document.querySelectorAll('.menu-btn').forEach(function(btn) {
@@ -1880,8 +1813,7 @@ window.TypingCore = {
     if (resultBackAction) resultBackAction();
   });
 
-  startBGM('screen-home');
-  if (document.body.focus) document.body.focus({ preventScroll: true });
+  focusHardwareKeyboardCatcher();
 })();
 </script>
 
