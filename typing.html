@@ -176,7 +176,7 @@ button:active { transform: scale(0.96); }
 
 .lanes-wrap { position:relative; margin-bottom:18px; }
 .lanes { position:relative; display:flex; height:420px; background:linear-gradient(#eaf6ff,#f5fbff); border-radius:var(--radius-lg); overflow:hidden; box-shadow:inset 0 0 0 1px var(--hairline); }
-.lane { flex:1; position:relative; }
+.lane { flex:1; position:relative; cursor:pointer; }
 .lane:not(:last-child) { border-right:1px dashed var(--hairline); }
 .lane-indicator { position:absolute; top:0; left:10px; right:10px; height:7px; border-radius:0 0 7px 7px; background:var(--fill-quiet); transition:background 150ms ease, box-shadow 150ms ease; z-index:1; }
 .lane.selected { background:rgba(0,113,227,0.1); transition:background 150ms ease; }
@@ -380,7 +380,7 @@ button:active { transform: scale(0.96); }
     <h1><ruby>単語<rt>たんご</rt></ruby></h1>
     <span class="header-spacer"></span>
   </div>
-  <div class="instruction-card">イカが<ruby>下<rt>した</rt></ruby>に<ruby>着<rt>つ</rt></ruby>く<ruby>前<rt>まえ</rt></ruby>に、ローマ<ruby>字<rt>じ</rt></ruby>で<ruby>退治<rt>たいじ</rt></ruby>しよう!<br>スペースを<ruby>押<rt>お</rt></ruby>してバーを<ruby>移動<rt>いどう</rt></ruby>しよう</div>
+  <div class="instruction-card">イカが<ruby>下<rt>した</rt></ruby>に<ruby>着<rt>つ</rt></ruby>く<ruby>前<rt>まえ</rt></ruby>に、ローマ<ruby>字<rt>じ</rt></ruby>で<ruby>退治<rt>たいじ</rt></ruby>しよう!<br>スペースを<ruby>押<rt>お</rt></ruby>すか、レーンをタップしてバーを<ruby>移動<rt>いどう</rt></ruby>しよう</div>
   <div class="stats-row">
     <span>たおした<ruby>数<rt>かず</rt></ruby> <b id="word-defeated-count">0</b></span>
     <span><ruby>残<rt>のこ</rt></ruby>り <b id="word-lives">❤️❤️❤️</b></span>
@@ -1472,10 +1472,7 @@ window.TypingCore = {
     wordKeyHandler = function(e) {
       if (e.key === ' ') {
         e.preventDefault();
-        wordSelectedLane = (wordSelectedLane + 1) % LANE_COUNT;
-        updateLaneSelectionVisual();
-        refreshTargetVisuals();
-        playClick();
+        selectWordLane((wordSelectedLane + 1) % LANE_COUNT);
         return;
       }
       if (!/^[a-z]$/.test(e.key)) return;
@@ -1503,6 +1500,18 @@ window.TypingCore = {
       lane.classList.toggle('selected', parseInt(lane.dataset.lane, 10) === wordSelectedLane);
     });
   }
+  function selectWordLane(n) {
+    wordSelectedLane = n;
+    updateLaneSelectionVisual();
+    refreshTargetVisuals();
+    playClick();
+  }
+  document.querySelectorAll('#lanes .lane').forEach(function(laneEl) {
+    laneEl.addEventListener('click', function() {
+      if (!wordActive) return;
+      selectWordLane(parseInt(laneEl.dataset.lane, 10));
+    });
+  });
   function heartsHtml(lives, total) {
     var s = '';
     for (var i = 0; i < total; i++) s += i < lives ? '❤️' : '🖤';
