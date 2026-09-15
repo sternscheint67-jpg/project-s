@@ -37,6 +37,7 @@ body {
   margin: 0;
   padding: 24px;
   -webkit-font-smoothing: antialiased;
+  outline: none;
 }
 
 .screen { max-width: 900px; margin: 0 auto; }
@@ -313,7 +314,7 @@ button:active { transform: scale(0.96); }
 }
 </style>
 </head>
-<body>
+<body tabindex="-1">
 
 <div id="screen-home" class="screen">
   <h1>タイピング<ruby>練習<rt>れんしゅう</rt></ruby></h1>
@@ -1155,6 +1156,12 @@ window.TypingCore = {
     startBGM(screenId);
     if (screenId === 'screen-sentence-levels') renderLevelList();
     if (screenId === 'screen-certification') resetCertificationScreen();
+    // iPadOS Safari can fail to dispatch keydown from an attached hardware
+    // keyboard to the page at all unless some element currently holds
+    // focus (the body itself doesn't reliably count). Focusing an
+    // invisible, non-tab-reachable element keeps keyboard-driven screens
+    // (practice/word/sentence) responsive when a keyboard is attached.
+    if (document.body.focus) document.body.focus({ preventScroll: true });
   }
 
   document.querySelectorAll('.menu-btn').forEach(function(btn) {
@@ -1874,6 +1881,7 @@ window.TypingCore = {
   });
 
   startBGM('screen-home');
+  if (document.body.focus) document.body.focus({ preventScroll: true });
 })();
 </script>
 
