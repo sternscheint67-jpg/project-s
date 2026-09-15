@@ -100,16 +100,20 @@ button:active { transform: scale(0.96); }
 .menu-extra-settings-title { text-align:center; font-size:11px; font-weight:700; color:var(--text-secondary); padding:9px 0 3px; }
 .menu-extra-settings .settings-row { padding:8px 0; font-size:12px; }
 .menu-extra-settings .ios-switch { width:40px; height:24px; border-radius:12px; }
+.menu-extra-settings .ios-switch-track { border-radius:12px; }
 .menu-extra-settings .ios-switch-knob { width:20px; height:20px; top:2px; left:2px; }
 .menu-extra-settings .ios-switch.on .ios-switch-knob { transform:translateX(16px); }
 
 .settings-row { display:flex; align-items:center; justify-content:space-between; padding:13px 0; font-size:15px; }
 .settings-row:not(:last-child) { border-bottom:1px solid var(--hairline); }
-.ios-switch { width:50px; height:30px; border-radius:15px; background:#b0b0b8; border:none; position:relative; cursor:pointer; padding:0; flex-shrink:0; transition:background 180ms ease; }
-.ios-switch.on { background:var(--success); }
+.ios-switch { width:50px; height:30px; border-radius:15px; background:none; border:none; position:relative; cursor:pointer; padding:0; flex-shrink:0; }
+.ios-switch-track {
+  position:absolute; inset:0; border-radius:15px; background:#b0b0b8; transition:background 180ms ease; pointer-events:none;
+}
+.ios-switch.on .ios-switch-track { background:var(--success); }
 .ios-switch-knob {
   position:absolute; top:2px; left:2px; width:26px; height:26px; border-radius:50%; background:#fff;
-  box-shadow:0 3px 6px rgba(0,0,0,0.25); transition:transform 220ms cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow:0 3px 6px rgba(0,0,0,0.25); transition:transform 220ms cubic-bezier(0.34,1.56,0.64,1); pointer-events:none;
 }
 .ios-switch.on .ios-switch-knob { transform:translateX(20px); }
 
@@ -340,11 +344,11 @@ button:active { transform: scale(0.96); }
         <div class="menu-extra-settings-title"><ruby>設定<rt>せってい</rt></ruby></div>
         <div class="settings-row">
           <span>BGM</span>
-          <button type="button" id="bgm-toggle" class="ios-switch" role="switch"><span class="ios-switch-knob"></span></button>
+          <button type="button" id="bgm-toggle" class="ios-switch" role="switch"><span class="ios-switch-track"></span><span class="ios-switch-knob"></span></button>
         </div>
         <div class="settings-row">
           <span><ruby>効果音<rt>こうかおん</rt></ruby></span>
-          <button type="button" id="sfx-toggle" class="ios-switch" role="switch"><span class="ios-switch-knob"></span></button>
+          <button type="button" id="sfx-toggle" class="ios-switch" role="switch"><span class="ios-switch-track"></span><span class="ios-switch-knob"></span></button>
         </div>
       </div>
     </div>
