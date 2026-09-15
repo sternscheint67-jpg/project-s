@@ -1199,6 +1199,24 @@ window.TypingCore = {
     });
     return html2canvasPromise;
   }
+  function legacyDownloadBlob(blob, filename) {
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.download = filename;
+    link.href = url;
+    link.click();
+    setTimeout(function() { URL.revokeObjectURL(url); }, 2000);
+  }
+  function saveBlobAsFile(blob, filename) {
+    if (window.claude && typeof window.claude.use === 'function') {
+      return window.claude.use('downloads').then(function(downloads) {
+        if (!downloads) { legacyDownloadBlob(blob, filename); return; }
+        return downloads.save({ filename: filename, data: blob });
+      });
+    }
+    legacyDownloadBlob(blob, filename);
+    return Promise.resolve();
+  }
   function saveRomajiTableImage() {
     var A4_W = 1754, A4_H = 1240; // A4 landscape at ~150dpi
     var original = document.getElementById('romaji-table-print');
@@ -1220,20 +1238,14 @@ window.TypingCore = {
     return window.html2canvas(wrapper, { width: A4_W, height: A4_H, windowWidth: A4_W, backgroundColor: '#ffffff', scale: 1 })
       .then(function(canvas) {
         document.body.removeChild(wrapper);
-        return new Promise(function(resolve) {
+        return new Promise(function(resolve, reject) {
           canvas.toBlob(function(blob) {
-            var url = URL.createObjectURL(blob);
-            var link = document.createElement('a');
-            link.download = 'ローマ字表.png';
-            link.href = url;
-            link.click();
-            setTimeout(function() { URL.revokeObjectURL(url); }, 2000);
-            resolve();
+            saveBlobAsFile(blob, 'ローマ字表.png').then(resolve, reject);
           }, 'image/png');
         });
       })
       .catch(function(err) {
-        document.body.removeChild(wrapper);
+        if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
         throw err;
       });
   }
@@ -1245,7 +1257,8 @@ window.TypingCore = {
     btn.textContent = '...';
     loadHtml2Canvas()
       .then(saveRomajiTableImage)
-      .catch(function() {
+      .catch(function(err) {
+        if (err && err.code === 'declined') return;
         alert('画像の作成に失敗しました。インターネットに接続してからもう一度お試しください。');
       })
       .then(function() {
