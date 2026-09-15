@@ -347,10 +347,6 @@ button:active { transform: scale(0.96); }
           <span>BGM</span>
           <button type="button" id="bgm-toggle" class="ios-switch" role="switch"><span class="ios-switch-track"></span><span class="ios-switch-knob"></span></button>
         </div>
-        <div class="settings-row">
-          <span><ruby>効果音<rt>こうかおん</rt></ruby></span>
-          <button type="button" id="sfx-toggle" class="ios-switch" role="switch"><span class="ios-switch-track"></span><span class="ios-switch-knob"></span></button>
-        </div>
       </div>
     </div>
   </div>
@@ -1050,10 +1046,10 @@ window.TypingCore = {
   function loadSettings() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return { bgmOn: true, sfxOn: true };
+      if (!raw) return { bgmOn: false };
       var parsed = JSON.parse(raw);
-      return { bgmOn: parsed.bgmOn !== false, sfxOn: parsed.sfxOn !== false };
-    } catch (e) { return { bgmOn: true, sfxOn: true }; }
+      return { bgmOn: parsed.bgmOn === true };
+    } catch (e) { return { bgmOn: false }; }
   }
   function saveSettings() { localStorage.setItem(STORAGE_KEY, JSON.stringify(settings)); }
 
@@ -1088,23 +1084,20 @@ window.TypingCore = {
     o.connect(g); g.connect(c.destination);
     o.start(t); o.stop(t + durationMs / 1000 + 0.02);
   }
-  function playCorrect() { if (settings.sfxOn) playTone(880, 0.18, 90); }
-  function playMistake() { if (settings.sfxOn) playTone(160, 0.2, 140, 'square'); }
+  function playCorrect() { playTone(880, 0.18, 90); }
+  function playMistake() { playTone(160, 0.2, 140, 'square'); }
   function playComplete() {
-    if (!settings.sfxOn) return;
     [523.25, 659.25, 783.99, 1046.5].forEach(function(freq, i) {
       setTimeout(function() { playTone(freq, 0.2, 220); }, i * 90);
     });
   }
-  function playClick() { if (settings.sfxOn) playTone(600, 0.12, 60); }
+  function playClick() { playTone(600, 0.12, 60); }
   function playRepComplete() {
-    if (!settings.sfxOn) return;
     [659.25, 880.0].forEach(function(freq, i) {
       setTimeout(function() { playTone(freq, 0.16, 100); }, i * 70);
     });
   }
   function playRowComplete() {
-    if (!settings.sfxOn) return;
     [523.25, 659.25, 880.0].forEach(function(freq, i) {
       setTimeout(function() { playTone(freq, 0.18, 150); }, i * 90);
     });
@@ -1134,11 +1127,8 @@ window.TypingCore = {
 
   function renderSettingsToggles() {
     var bgmBtn = document.getElementById('bgm-toggle');
-    var sfxBtn = document.getElementById('sfx-toggle');
     bgmBtn.className = 'ios-switch' + (settings.bgmOn ? ' on' : '');
     bgmBtn.setAttribute('aria-checked', String(settings.bgmOn));
-    sfxBtn.className = 'ios-switch' + (settings.sfxOn ? ' on' : '');
-    sfxBtn.setAttribute('aria-checked', String(settings.sfxOn));
   }
   renderSettingsToggles();
 
@@ -1147,12 +1137,6 @@ window.TypingCore = {
     saveSettings();
     renderSettingsToggles();
     startBGM('screen-home');
-  });
-  document.getElementById('sfx-toggle').addEventListener('click', function() {
-    settings.sfxOn = !settings.sfxOn;
-    saveSettings();
-    renderSettingsToggles();
-    playClick();
   });
 
   document.querySelectorAll('.back-btn').forEach(function(btn) {
