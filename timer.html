@@ -69,7 +69,8 @@ button:disabled:active { transform: none; }
 /* ===== layout ===== */
 .timer-body { flex: 1; display: flex; gap: clamp(10px, 1.6vw, 18px); min-height: 0; }
 .task-column { flex: 0 0 clamp(190px, 22vw, 260px); display: flex; flex-direction: column; gap: clamp(6px, 1dvh, 12px); min-height: 0; }
-.right-column { flex: 1; display: flex; flex-direction: row; gap: clamp(10px, 1.6vw, 18px); min-height: 0; }
+.right-column { flex: 1; display: flex; flex-direction: column; gap: clamp(8px, 1.4dvh, 16px); min-height: 0; }
+.right-row { flex: 1; display: flex; flex-direction: row; gap: clamp(10px, 1.6vw, 18px); min-height: 0; }
 
 .task-btn {
   flex: 1; min-height: 0; display: flex; align-items: center; gap: clamp(8px, 1.2vw, 14px);
@@ -91,7 +92,7 @@ button:disabled:active { transform: none; }
 .clock-info-goal { font-size: clamp(11px, 1.5dvh, 15px); font-weight: 600; margin-top: 2px; }
 
 #input-clock svg, #timer-clock svg, #result-clock svg { display: block; width: auto; }
-#input-clock svg { height: clamp(120px, 20dvh, 190px); }
+#input-clock svg { height: clamp(150px, 30dvh, 260px); }
 #timer-clock svg { height: clamp(150px, 28dvh, 280px); }
 #result-clock svg { height: clamp(140px, 24dvh, 240px); }
 
@@ -132,7 +133,7 @@ button:disabled:active { transform: none; }
   .task-column { flex-direction: row; flex: none; width: 100%; }
   .task-btn { flex-direction: column; gap: 4px; padding: 8px 4px; }
   .task-btn .task-check { display: none; }
-  .right-column { flex-direction: column; }
+  .right-row { flex-direction: column; }
   .clock-card { flex-direction: column; text-align: center; }
   .stats-row, .compare-row { flex-wrap: wrap; }
 }
@@ -146,38 +147,40 @@ button:disabled:active { transform: none; }
   <div class="timer-body">
     <div class="task-column" id="task-column"></div>
     <div class="right-column">
-      <div class="card clock-card">
-        <div id="input-clock"></div>
-        <div class="clock-info">
-          <span class="clock-info-label">いまの じかん</span>
-          <span id="input-now-display" class="clock-info-now">--:--</span>
-          <span id="input-goal-display" class="clock-info-goal">やることを えらんでね</span>
+      <div class="right-row">
+        <div class="card clock-card">
+          <div id="input-clock"></div>
+          <div class="clock-info">
+            <span class="clock-info-label">いまの じかん</span>
+            <span id="input-now-display" class="clock-info-now">--:--</span>
+            <span id="input-goal-display" class="clock-info-goal">やることを えらんでね</span>
+          </div>
+        </div>
+        <div class="card input-card">
+          <h2><ruby>何分<rt>なんぷん</rt></ruby>かかりそう?</h2>
+          <div class="digital-display">
+            <span id="minutes-display" class="digital-display-num">0</span>
+            <span class="digital-display-unit"><ruby>分<rt>ふん</rt></ruby></span>
+          </div>
+          <div class="keypad" id="input-keypad">
+            <button type="button" class="keypad-btn" data-digit="1">1</button>
+            <button type="button" class="keypad-btn" data-digit="2">2</button>
+            <button type="button" class="keypad-btn" data-digit="3">3</button>
+            <button type="button" class="keypad-btn" data-digit="4">4</button>
+            <button type="button" class="keypad-btn" data-digit="5">5</button>
+            <button type="button" class="keypad-btn" data-digit="6">6</button>
+            <button type="button" class="keypad-btn" data-digit="7">7</button>
+            <button type="button" class="keypad-btn" data-digit="8">8</button>
+            <button type="button" class="keypad-btn" data-digit="9">9</button>
+            <button type="button" id="minutes-clear" class="keypad-btn keypad-btn-quiet">クリア</button>
+            <button type="button" class="keypad-btn" data-digit="0">0</button>
+            <button type="button" id="minutes-backspace" class="keypad-btn keypad-btn-quiet">⌫</button>
+          </div>
         </div>
       </div>
-      <div class="card input-card">
-        <h2><ruby>何分<rt>なんぷん</rt></ruby>かかりそう?</h2>
-        <div class="digital-display">
-          <span id="minutes-display" class="digital-display-num">0</span>
-          <span class="digital-display-unit"><ruby>分<rt>ふん</rt></ruby></span>
-        </div>
-        <div class="keypad" id="input-keypad">
-          <button type="button" class="keypad-btn" data-digit="1">1</button>
-          <button type="button" class="keypad-btn" data-digit="2">2</button>
-          <button type="button" class="keypad-btn" data-digit="3">3</button>
-          <button type="button" class="keypad-btn" data-digit="4">4</button>
-          <button type="button" class="keypad-btn" data-digit="5">5</button>
-          <button type="button" class="keypad-btn" data-digit="6">6</button>
-          <button type="button" class="keypad-btn" data-digit="7">7</button>
-          <button type="button" class="keypad-btn" data-digit="8">8</button>
-          <button type="button" class="keypad-btn" data-digit="9">9</button>
-          <button type="button" id="minutes-clear" class="keypad-btn keypad-btn-quiet">クリア</button>
-          <button type="button" class="keypad-btn" data-digit="0">0</button>
-          <button type="button" id="minutes-backspace" class="keypad-btn keypad-btn-quiet">⌫</button>
-        </div>
-      </div>
+      <button id="start-btn" class="btn-start" disabled>スタート</button>
     </div>
   </div>
-  <button id="start-btn" class="btn-start" disabled>スタート</button>
 </div>
 
 <!-- ===================== Screen 2: 作業中のタイマー ===================== -->
