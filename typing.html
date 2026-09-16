@@ -1016,17 +1016,20 @@ window.TypingCore = {
   }
   renderMascotIcons();
 
-  // The layout is sized for phone-width screens (max-width caps around
-  // 420-900px), so on an iPad's much larger display it renders small and
-  // surrounded by empty space. iPad reports itself as "Macintosh" in the
-  // user agent since iPadOS 13, so touch points + Mac platform is the
-  // standard way to detect it regardless of whether a trackpad (which
-  // would otherwise make a pointer-based media query miss it) is attached.
-  (function scaleUpForIPad() {
-    var isIPad = /iPad/.test(navigator.userAgent) ||
-      (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform));
-    if (isIPad) document.body.style.zoom = 1.5;
-  })();
+  // The home screen's menu tiles are sized for phone-width screens (max-width
+  // 420px), so on an iPad's much larger display they render small and
+  // surrounded by empty space; the other screens (practice/word/sentence/
+  // certification/romaji-table) already use the display well at their
+  // normal size, so the zoom is applied only on the home screen. iPad
+  // reports itself as "Macintosh" in the user agent since iPadOS 13, so
+  // touch points + Mac platform is the standard way to detect it regardless
+  // of whether a trackpad (which would otherwise make a pointer-based media
+  // query miss it) is attached.
+  var isIPad = /iPad/.test(navigator.userAgent) ||
+    (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform));
+  function updateIPadZoom(screenId) {
+    document.body.style.zoom = (isIPad && screenId === 'screen-home') ? 1.5 : '';
+  }
 
   var bestGrades = loadBestGrades();
 
@@ -1113,6 +1116,7 @@ window.TypingCore = {
     stopSentence();
     stopCertification();
     showScreen(screenId);
+    updateIPadZoom(screenId);
     if (screenId === 'screen-sentence-levels') renderLevelList();
     if (screenId === 'screen-certification') resetCertificationScreen();
     else focusHardwareKeyboardCatcher();
@@ -1835,6 +1839,7 @@ window.TypingCore = {
   });
 
   focusHardwareKeyboardCatcher();
+  updateIPadZoom('screen-home');
 })();
 </script>
 
