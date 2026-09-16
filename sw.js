@@ -1,5 +1,5 @@
-var CACHE_NAME = 'settsu-regi-cache-v1';
-var CACHE_FILES = ['./', './index.html'];
+var CACHE_NAME = 'settsu-regi-cache-v2';
+var CACHE_FILES = ['./', './index.html', './timer.html'];
 
 self.addEventListener('install', function(event) {
   event.waitUntil(

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="タイマー">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>タイマー</title>
+<style>
+:root {
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --text: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --accent: #0071e3;
+  --accent-tint: #eaf3ff;
+  --success: #30b350;
+  --danger: #ff3b30;
+  --warning-text: #b9650a;
+  --warning-tint: #fff1ee;
+  --hairline: rgba(0,0,0,0.08);
+  --fill-quiet: #e8e8ed;
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 10px 24px rgba(0,0,0,0.05);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 20px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.screen { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; min-height: calc(100vh - 40px); }
+
+h1 { text-align: center; font-size: 26px; font-weight: 700; letter-spacing: -0.01em; margin: 4px 0 0; }
+h2 { font-size: 15px; font-weight: 600; color: var(--text-secondary); margin: 0 0 10px; }
+
+button { font-family: inherit; -webkit-tap-highlight-color: transparent; }
+button:active { transform: scale(0.96); }
+@media (prefers-reduced-motion: reduce) {
+  button:active { transform: none; }
+}
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button:disabled:active { transform: none; }
+
+.link-btn { background: none; border: none; color: var(--accent); font-size: 15px; font-weight: 600; cursor: pointer; padding: 8px 4px; }
+.link-btn:active { opacity: 0.5; transform: none; }
+
+/* ===== layout ===== */
+.timer-body { flex: 1; display: flex; gap: 18px; min-height: 0; }
+.task-column { flex: 0 0 260px; display: flex; flex-direction: column; gap: 12px; }
+.right-column { flex: 1; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+
+.task-btn {
+  flex: 1; min-height: 74px; display: flex; align-items: center; gap: 14px;
+  padding: 0 18px; border-radius: 18px; background: var(--surface);
+  border: 3px solid transparent; box-shadow: var(--shadow-card); cursor: pointer; text-align: left;
+}
+.task-btn .task-icon { flex-shrink: 0; }
+.task-btn .task-label { font-size: 20px; font-weight: 700; }
+.task-btn .task-check { margin-left: auto; opacity: 0; }
+.task-btn.selected .task-check { opacity: 1; }
+
+.card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 18px 22px; }
+
+.clock-card { display: flex; align-items: center; gap: 22px; }
+.clock-info { display: flex; flex-direction: column; gap: 6px; }
+.clock-info-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.clock-info-now { font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.clock-info-goal { font-size: 15px; font-weight: 600; margin-top: 4px; }
+
+.input-card { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.digital-display { display: flex; align-items: baseline; justify-content: center; gap: 8px; background: var(--bg); border-radius: 16px; padding: 12px 0; margin-bottom: 12px; }
+.digital-display-num { font-size: 46px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.digital-display-unit { font-size: 20px; font-weight: 600; color: var(--text-secondary); }
+
+.keypad { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; flex: 1; }
+.keypad-btn { background: var(--fill-quiet); border: none; border-radius: 14px; font-size: 21px; font-weight: 500; cursor: pointer; color: var(--text); }
+.keypad-btn-quiet { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+
+.btn-start, .btn-done, .btn-again {
+  width: 100%; border: none; border-radius: var(--radius-md); color: #ffffff;
+  font-size: 21px; font-weight: 700; letter-spacing: -0.01em; padding: 18px 0; cursor: pointer;
+}
+.btn-done { background: var(--success); box-shadow: 0 4px 14px rgba(48,179,80,0.32); margin-top: auto; }
+.btn-again { background: var(--accent); box-shadow: 0 4px 14px rgba(0,113,227,0.32); margin-top: auto; }
+
+.top-bar { display: flex; align-items: center; justify-content: space-between; max-width: 900px; width: 100%; margin: 0 auto; }
+.task-chip { display: flex; align-items: center; gap: 8px; border-radius: 999px; padding: 8px 16px; font-size: 16px; font-weight: 700; }
+
+.timer-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
+
+.stats-row { display: flex; gap: 14px; width: 100%; max-width: 900px; margin: 0 auto; }
+.stat-card { flex: 1; border-radius: 18px; box-shadow: var(--shadow-card); padding: 14px 18px; text-align: center; background: var(--surface); }
+.stat-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+.stat-value { font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.result-headline { display: flex; align-items: center; gap: 12px; border-radius: 999px; padding: 12px 26px; margin: 0 auto; }
+.result-headline-text { font-size: 23px; font-weight: 700; }
+
+.compare-row { display: flex; align-items: stretch; gap: 14px; width: 100%; max-width: 820px; margin: 0 auto; }
+.compare-arrow { flex: 0 0 40px; display: flex; align-items: center; justify-content: center; }
+
+@media (max-width: 820px) {
+  .timer-body { flex-direction: column; }
+  .task-column { flex-direction: row; flex: none; width: 100%; }
+  .task-btn { flex-direction: column; gap: 4px; padding: 10px 4px; min-height: 64px; }
+  .task-btn .task-label { font-size: 14px; }
+  .task-btn .task-check { display: none; }
+  .clock-card { flex-direction: column; text-align: center; }
+  .stats-row, .compare-row { flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== Screen 1: 初めの入力画面 ===================== -->
+<div id="screen-input" class="screen" style="display:none">
+  <h1>タイマー</h1>
+  <div class="timer-body">
+    <div class="task-column" id="task-column"></div>
+    <div class="right-column">
+      <div class="card clock-card">
+        <div id="input-clock"></div>
+        <div class="clock-info">
+          <span class="clock-info-label">いまの じかん</span>
+          <span id="input-now-display" class="clock-info-now">--:--</span>
+          <span id="input-goal-display" class="clock-info-goal">やることを えらんでね</span>
+        </div>
+      </div>
+      <div class="card input-card">
+        <h2><ruby>何分<rt>なんぷん</rt></ruby>かかりそう?</h2>
+        <div class="digital-display">
+          <span id="minutes-display" class="digital-display-num">0</span>
+          <span class="digital-display-unit"><ruby>分<rt>ふん</rt></ruby></span>
+        </div>
+        <div class="keypad" id="input-keypad">
+          <button type="button" class="keypad-btn" data-digit="1">1</button>
+          <button type="button" class="keypad-btn" data-digit="2">2</button>
+          <button type="button" class="keypad-btn" data-digit="3">3</button>
+          <button type="button" class="keypad-btn" data-digit="4">4</button>
+          <button type="button" class="keypad-btn" data-digit="5">5</button>
+          <button type="button" class="keypad-btn" data-digit="6">6</button>
+          <button type="button" class="keypad-btn" data-digit="7">7</button>
+          <button type="button" class="keypad-btn" data-digit="8">8</button>
+          <button type="button" class="keypad-btn" data-digit="9">9</button>
+          <button type="button" id="minutes-clear" class="keypad-btn keypad-btn-quiet">クリア</button>
+          <button type="button" class="keypad-btn" data-digit="0">0</button>
+          <button type="button" id="minutes-backspace" class="keypad-btn keypad-btn-quiet">⌫</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button id="start-btn" class="btn-start" disabled>スタート</button>
+</div>
+
+<!-- ===================== Screen 2: 作業中のタイマー ===================== -->
+<div id="screen-timer" class="screen" style="display:none">
+  <div class="top-bar">
+    <button id="quit-btn" class="link-btn">← やめる</button>
+    <span id="timer-task-chip" class="task-chip"></span>
+    <span style="width:70px"></span>
+  </div>
+  <div class="timer-center">
+    <div id="timer-clock"></div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label"><ruby>経過<rt>けいか</rt></ruby></div>
+        <div id="timer-elapsed-display" class="stat-value">00:00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><ruby>予想<rt>よそう</rt></ruby></div>
+        <div id="timer-predicted-display" class="stat-value" style="color:var(--text-secondary)">00:00</div>
+      </div>
+      <div class="stat-card" id="timer-diff-card">
+        <div class="stat-label" id="timer-diff-label"><ruby>差<rt>さ</rt></ruby></div>
+        <div id="timer-diff-display" class="stat-value">±0:00</div>
+      </div>
+    </div>
+  </div>
+  <button id="done-btn" class="btn-done"><ruby>完了<rt>かんりょう</rt></ruby></button>
+</div>
+
+<!-- ===================== Screen 3: 作業後の比較画面 ===================== -->
+<div id="screen-result" class="screen" style="display:none">
+  <h1 style="color:var(--text-secondary);font-size:22px" id="result-title"></h1>
+  <div class="timer-center">
+    <span id="result-headline" class="result-headline">
+      <span id="result-headline-icon"></span>
+      <span id="result-headline-text" class="result-headline-text"></span>
+    </span>
+    <div id="result-clock"></div>
+    <div class="compare-row">
+      <div class="stat-card">
+        <div class="stat-label"><ruby>予想<rt>よそう</rt></ruby></div>
+        <div id="result-predicted-display" class="stat-value">00:00</div>
+      </div>
+      <div class="compare-arrow">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><ruby>実際<rt>じっさい</rt></ruby></div>
+        <div id="result-actual-display" class="stat-value">00:00</div>
+      </div>
+      <div class="stat-card" id="result-diff-card">
+        <div class="stat-label"><ruby>差<rt>さ</rt></ruby></div>
+        <div id="result-diff-display" class="stat-value">±0:00</div>
+      </div>
+    </div>
+  </div>
+  <button id="again-btn" class="btn-again">もういちど</button>
+</div>
+
+<script id="core-logic">
+(function(){
+
+var TASKS = [
+  {
+    id: 'work', color: '#0071e3', tint: '#eaf3ff', labelHtml: '<ruby>作業<rt>さぎょう</rt></ruby>',
+    icon: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M8 12l2.5 2.5L16 9"/>'
+  },
+  {
+    id: 'rest', color: '#30b350', tint: '#eafaf0', labelHtml: '<ruby>休憩<rt>きゅうけい</rt></ruby>',
+    icon: '<path d="M4 4h12v8a6 6 0 0 1-12 0V4z"/><path d="M16 6h2a3 3 0 0 1 0 6h-2"/><path d="M2 20h16"/>'
+  },
+  {
+    id: 'toilet', color: '#00b5d8', tint: '#e6f9fc', labelHtml: 'トイレ',
+    icon: '<circle cx="12" cy="6" r="2.5"/><path d="M8 21v-6a4 4 0 0 1 8 0v6"/>'
+  },
+  {
+    id: 'other', color: '#805ad5', tint: '#f3edfc', labelHtml: 'その<ruby>他<rt>た</rt></ruby>',
+    icon: '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>'
+  }
+];
+
+function findTask(taskId) {
+  return TASKS.filter(function(t) { return t.id === taskId; })[0] || null;
+}
+
+function pad2(n) { return (n < 10 ? '0' : '') + n; }
+
+function formatClock(totalSeconds) {
+  var s = Math.max(0, Math.round(totalSeconds));
+  var m = Math.floor(s / 60);
+  var sec = s % 60;
+  return pad2(m) + ':' + pad2(sec);
+}
+
+function formatSignedClock(totalSeconds) {
+  var sign = totalSeconds < 0 ? '−' : '+';
+  return sign + formatClock(Math.abs(totalSeconds));
+}
+
+function elapsedSeconds(startMs, nowMs) {
+  return Math.max(0, Math.floor((nowMs - startMs) / 1000));
+}
+
+function diffSeconds(elapsedSec, predictedMinutes) {
+  return elapsedSec - predictedMinutes * 60;
+}
+
+var ON_TIME_THRESHOLD_SECONDS = 60;
+
+function resultCategory(diffSec) {
+  if (diffSec > ON_TIME_THRESHOLD_SECONDS) return 'late';
+  if (diffSec < -ON_TIME_THRESHOLD_SECONDS) return 'early';
+  return 'onTime';
+}
+
+function hourAngle(date) {
+  var h = date.getHours() % 12;
+  var m = date.getMinutes();
+  var s = date.getSeconds();
+  return (h + m / 60 + s / 3600) * 30;
+}
+
+function minuteAngle(date) {
+  var m = date.getMinutes();
+  var s = date.getSeconds();
+  return (m + s / 60) * 6;
+}
+
+function polarPoint(cx, cy, r, deg) {
+  var rad = deg * Math.PI / 180;
+  return { x: cx + r * Math.sin(rad), y: cy - r * Math.cos(rad) };
+}
+
+function pieSlicePath(cx, cy, r, startDeg, endDeg) {
+  var sweep = endDeg - startDeg;
+  if (sweep <= 0.001) return '';
+  if (sweep >= 359.9) sweep = 359.9;
+  var p0 = polarPoint(cx, cy, r, startDeg);
+  var p1 = polarPoint(cx, cy, r, startDeg + sweep);
+  var largeArc = sweep > 180 ? 1 : 0;
+  return 'M' + cx + ',' + cy + ' L' + p0.x + ',' + p0.y + ' A' + r + ',' + r + ' 0 ' + largeArc + ',1 ' + p1.x + ',' + p1.y + ' Z';
+}
+
+function arcPath(cx, cy, r, startDeg, endDeg) {
+  var sweep = endDeg - startDeg;
+  if (sweep <= 0.001) return '';
+  if (sweep >= 359.9) sweep = 359.9;
+  var p0 = polarPoint(cx, cy, r, startDeg);
+  var p1 = polarPoint(cx, cy, r, startDeg + sweep);
+  var largeArc = sweep > 180 ? 1 : 0;
+  return 'M' + p0.x + ',' + p0.y + ' A' + r + ',' + r + ' 0 ' + largeArc + ',1 ' + p1.x + ',' + p1.y;
+}
+
+window.TimerLogic = {
+  TASKS: TASKS,
+  findTask: findTask,
+  pad2: pad2,
+  formatClock: formatClock,
+  formatSignedClock: formatSignedClock,
+  elapsedSeconds: elapsedSeconds,
+  diffSeconds: diffSeconds,
+  ON_TIME_THRESHOLD_SECONDS: ON_TIME_THRESHOLD_SECONDS,
+  resultCategory: resultCategory,
+  hourAngle: hourAngle,
+  minuteAngle: minuteAngle,
+  polarPoint: polarPoint,
+  pieSlicePath: pieSlicePath,
+  arcPath: arcPath
+};
+
+})();
+</script>
+
+<script id="app-ui">
+(function(){
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(function() {});
+  }
+
+  var L = window.TimerLogic;
+
+  var CX = 160, CY = 160;
+  var FACE_R = 155, PIE_R = 130, RING_R = 145;
+  var TICK_ANGLES = [0,30,60,90,120,150,180,210,240,270,300,330];
+
+  var selectedTaskId = null;
+  var minutesDigits = '';
+  var startTimestamp = null;
+  var startMinuteAngle = 0;
+  var finalElapsedSeconds = 0;
+  var finalDiffSeconds = 0;
+  var tickTimer = null;
+
+  function predictedMinutes() {
+    return minutesDigits === '' ? 0 : parseInt(minutesDigits, 10);
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(function(el) { el.style.display = 'none'; });
+    document.getElementById(id).style.display = 'flex';
+  }
+
+  function ticksSvg() {
+    return TICK_ANGLES.map(function(angle) {
+      return '<line x1="160" y1="8" x2="160" y2="20" transform="rotate(' + angle + ',160,160)"/>';
+    }).join('');
+  }
+  var TICKS_MARKUP = '<g stroke="#c7c7cc" stroke-width="3" stroke-linecap="round">' + ticksSvg() + '</g>';
+
+  function handsSvg(hourDeg, minDeg) {
+    return '' +
+      '<line x1="160" y1="160" x2="160" y2="95" stroke="#1d1d1f" stroke-width="7" stroke-linecap="round" transform="rotate(' + hourDeg + ',160,160)"/>' +
+      '<line x1="160" y1="160" x2="160" y2="55" stroke="#1d1d1f" stroke-width="5" stroke-linecap="round" transform="rotate(' + minDeg + ',160,160)"/>' +
+      '<circle cx="160" cy="160" r="8" fill="#1d1d1f"/>';
+  }
+
+  function faceSvg() {
+    return '<circle cx="160" cy="160" r="' + FACE_R + '" fill="#ffffff" stroke="rgba(0,0,0,0.08)" stroke-width="2"/>';
+  }
+
+  // Builds the clock: startDeg is the minute-hand angle the wedge/pie is anchored to
+  // (either "now" for the not-started preview, or the moment the timer started).
+  function buildClockSvg(sizePx, opts) {
+    var now = opts.now;
+    var parts = [faceSvg()];
+
+    if (opts.previewSweepDeg > 0) {
+      parts.push('<path d="' + L.pieSlicePath(CX, CY, PIE_R, opts.startDeg, opts.startDeg + opts.previewSweepDeg) + '" fill="' + opts.color + '" fill-opacity="0.16"/>');
+    }
+
+    if (opts.onTimeSweepDeg > 0) {
+      parts.push('<path d="' + L.pieSlicePath(CX, CY, PIE_R, opts.startDeg, opts.startDeg + opts.onTimeSweepDeg) + '" fill="#0071e3" fill-opacity="0.85"/>');
+    }
+    if (opts.overSweepDeg > 0) {
+      parts.push('<path d="' + L.pieSlicePath(CX, CY, PIE_R, opts.startDeg + opts.onTimeSweepDeg, opts.startDeg + opts.onTimeSweepDeg + opts.overSweepDeg) + '" fill="#ff3b30" fill-opacity="0.85"/>');
+    }
+
+    parts.push(TICKS_MARKUP);
+
+    if (opts.showGoalMarker) {
+      var goalDeg = opts.startDeg + Math.min(opts.predictedSweepDeg, 359.9);
+      parts.push('<path d="' + L.arcPath(CX, CY, RING_R, opts.startDeg, goalDeg) + '" fill="none" stroke="#0071e3" stroke-width="4" stroke-dasharray="6 6" stroke-linecap="round" opacity="0.55"/>');
+      var markerPoint = L.polarPoint(CX, CY, RING_R, goalDeg);
+      parts.push('<circle cx="' + markerPoint.x + '" cy="' + markerPoint.y + '" r="7" fill="#0071e3" stroke="#fff" stroke-width="2"/>');
+    } else if (opts.previewSweepDeg > 0) {
+      var edgePoint = L.polarPoint(CX, CY, PIE_R, opts.startDeg + opts.previewSweepDeg);
+      parts.push('<circle cx="' + edgePoint.x + '" cy="' + edgePoint.y + '" r="8" fill="' + opts.color + '" stroke="#fff" stroke-width="2.5"/>');
+    }
+
+    parts.push(handsSvg(L.hourAngle(now), L.minuteAngle(now)));
+
+    return '<svg width="' + sizePx + '" height="' + sizePx + '" viewBox="0 0 320 320">' + parts.join('') + '</svg>';
+  }
+
+  function taskIconSvg(task, size, strokeWidth) {
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="' + task.color + '" stroke-width="' + strokeWidth + '" stroke-linecap="round" stroke-linejoin="round">' + task.icon + '</svg>';
+  }
+
+  // ===== Screen 1: input =====
+
+  function renderTaskColumn() {
+    var column = document.getElementById('task-column');
+    column.innerHTML = '';
+    L.TASKS.forEach(function(task) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'task-btn' + (task.id === selectedTaskId ? ' selected' : '');
+      btn.dataset.taskId = task.id;
+      if (task.id === selectedTaskId) {
+        btn.style.borderColor = task.color;
+        btn.style.background = task.tint;
+      }
+      var iconSpan = document.createElement('span');
+      iconSpan.className = 'task-icon';
+      iconSpan.innerHTML = taskIconSvg(task, 30, 2);
+      var labelSpan = document.createElement('span');
+      labelSpan.className = 'task-label';
+      labelSpan.style.color = task.id === selectedTaskId ? task.color : '#1d1d1f';
+      labelSpan.innerHTML = task.labelHtml;
+      var checkSpan = document.createElement('span');
+      checkSpan.className = 'task-check';
+      checkSpan.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' + task.color + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+      btn.appendChild(iconSpan);
+      btn.appendChild(labelSpan);
+      btn.appendChild(checkSpan);
+      column.appendChild(btn);
+    });
+  }
+
+  function renderInputClock() {
+    var now = new Date();
+    var task = L.findTask(selectedTaskId);
+    var minutes = predictedMinutes();
+    var nowAngle = L.minuteAngle(now);
+    var previewSweepDeg = (task && minutes > 0) ? Math.min(minutes * 6, 359.9) : 0;
+
+    document.getElementById('input-clock').innerHTML = buildClockSvg(190, {
+      now: now,
+      startDeg: nowAngle,
+      previewSweepDeg: previewSweepDeg,
+      onTimeSweepDeg: 0,
+      overSweepDeg: 0,
+      predictedSweepDeg: 0,
+      showGoalMarker: false,
+      color: task ? task.color : '#0071e3'
+    });
+
+    document.getElementById('input-now-display').textContent = L.pad2(now.getHours()) + ':' + L.pad2(now.getMinutes());
+
+    var goalEl = document.getElementById('input-goal-display');
+    if (!task) {
+      goalEl.textContent = 'やることを えらんでね';
+      goalEl.style.color = 'var(--text-secondary)';
+    } else if (minutes <= 0) {
+      goalEl.textContent = 'なんぷん かかるか にゅうりょくしよう';
+      goalEl.style.color = 'var(--text-secondary)';
+    } else {
+      var goalDate = new Date(now.getTime() + minutes * 60000);
+      goalEl.textContent = L.pad2(goalDate.getHours()) + ':' + L.pad2(goalDate.getMinutes()) + ' までに おわらせよう';
+      goalEl.style.color = task.color;
+    }
+  }
+
+  function renderMinutesDisplay() {
+    document.getElementById('minutes-display').textContent = String(predictedMinutes());
+  }
+
+  function updateStartButton() {
+    document.getElementById('start-btn').disabled = !(selectedTaskId && predictedMinutes() > 0);
+    var task = L.findTask(selectedTaskId);
+    document.getElementById('start-btn').style.background = task ? task.color : '#0071e3';
+  }
+
+  function renderInputScreen() {
+    renderTaskColumn();
+    renderInputClock();
+    renderMinutesDisplay();
+    updateStartButton();
+  }
+
+  document.getElementById('task-column').addEventListener('click', function(e) {
+    var btn = e.target.closest('.task-btn');
+    if (!btn) return;
+    selectedTaskId = btn.dataset.taskId;
+    renderInputScreen();
+  });
+
+  document.getElementById('input-keypad').addEventListener('click', function(e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    if (btn.dataset.digit !== undefined) {
+      if (minutesDigits.length < 3) minutesDigits += btn.dataset.digit;
+    } else if (btn.id === 'minutes-backspace') {
+      minutesDigits = minutesDigits.slice(0, -1);
+    } else if (btn.id === 'minutes-clear') {
+      minutesDigits = '';
+    } else {
+      return;
+    }
+    renderMinutesDisplay();
+    renderInputClock();
+    updateStartButton();
+  });
+
+  function goToInput() {
+    selectedTaskId = null;
+    minutesDigits = '';
+    renderInputScreen();
+    showScreen('screen-input');
+  }
+
+  document.getElementById('start-btn').addEventListener('click', function() {
+    if (!selectedTaskId || predictedMinutes() <= 0) return;
+    startTimestamp = Date.now();
+    startMinuteAngle = L.minuteAngle(new Date(startTimestamp));
+    renderTimerScreen();
+    showScreen('screen-timer');
+  });
+
+  // ===== Screen 2: timer =====
+
+  function renderTimerClock() {
+    var now = new Date();
+    var task = L.findTask(selectedTaskId);
+    var minutes = predictedMinutes();
+    var elapsed = L.elapsedSeconds(startTimestamp, now.getTime());
+    var elapsedMinutesFrac = elapsed / 60;
+    var predictedSweepDeg = Math.min(minutes * 6, 359.9);
+    var elapsedSweepDeg = Math.min(elapsedMinutesFrac * 6, 359.9);
+    var onTimeSweepDeg = Math.min(elapsedSweepDeg, predictedSweepDeg);
+    var overSweepDeg = Math.max(0, elapsedSweepDeg - predictedSweepDeg);
+
+    document.getElementById('timer-clock').innerHTML = buildClockSvg(280, {
+      now: now,
+      startDeg: startMinuteAngle,
+      previewSweepDeg: 0,
+      onTimeSweepDeg: onTimeSweepDeg,
+      overSweepDeg: overSweepDeg,
+      predictedSweepDeg: predictedSweepDeg,
+      showGoalMarker: true,
+      color: task ? task.color : '#0071e3'
+    });
+
+    var elapsedSec = elapsed;
+    var predictedSec = minutes * 60;
+    var diff = L.diffSeconds(elapsedSec, minutes);
+
+    document.getElementById('timer-elapsed-display').textContent = L.formatClock(elapsedSec);
+    document.getElementById('timer-predicted-display').textContent = L.formatClock(predictedSec);
+
+    var diffCard = document.getElementById('timer-diff-card');
+    var diffDisplay = document.getElementById('timer-diff-display');
+    var diffLabel = document.getElementById('timer-diff-label');
+    diffDisplay.textContent = L.formatSignedClock(diff);
+    if (diff > 0) {
+      diffCard.style.background = 'var(--warning-tint)';
+      diffDisplay.style.color = 'var(--danger)';
+      diffLabel.style.color = 'var(--warning-text)';
+      diffLabel.innerHTML = '<ruby>差<rt>さ</rt></ruby>(オーバー)';
+    } else {
+      diffCard.style.background = 'var(--surface)';
+      diffDisplay.style.color = 'var(--text)';
+      diffLabel.style.color = 'var(--text-secondary)';
+      diffLabel.innerHTML = '<ruby>差<rt>さ</rt></ruby>';
+    }
+  }
+
+  function renderTimerTaskChip() {
+    var task = L.findTask(selectedTaskId);
+    var chip = document.getElementById('timer-task-chip');
+    if (!task) { chip.innerHTML = ''; return; }
+    chip.style.background = task.tint;
+    chip.style.color = task.color;
+    chip.innerHTML = taskIconSvg(task, 20, 2) + '<span>' + task.labelHtml + ' ちゅう</span>';
+  }
+
+  function renderTimerScreen() {
+    renderTimerTaskChip();
+    renderTimerClock();
+  }
+
+  document.getElementById('quit-btn').addEventListener('click', function() {
+    if (!confirm('タイマーを やめますか?')) return;
+    goToInput();
+  });
+
+  document.getElementById('done-btn').addEventListener('click', function() {
+    var now = Date.now();
+    finalElapsedSeconds = L.elapsedSeconds(startTimestamp, now);
+    finalDiffSeconds = L.diffSeconds(finalElapsedSeconds, predictedMinutes());
+    renderResultScreen();
+    showScreen('screen-result');
+  });
+
+  // ===== Screen 3: result =====
+
+  var RESULT_META = {
+    early: { text: 'はやかった', bg: 'var(--accent-tint)', fg: 'var(--accent)' },
+    onTime: { text: 'ぴったり!', bg: '#eafaf0', fg: 'var(--success)' },
+    late: { text: 'ちょっと おそかった', bg: 'var(--warning-tint)', fg: 'var(--warning-text)' }
+  };
+
+  function resultHeadlineIcon(category, color) {
+    if (category === 'onTime') {
+      return '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+    }
+    if (category === 'early') {
+      return '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>';
+    }
+    return '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v6"/><path d="M12 16.5v.01"/></svg>';
+  }
+
+  function renderResultClock() {
+    var frozenNow = new Date(startTimestamp + finalElapsedSeconds * 1000);
+    var minutes = predictedMinutes();
+    var task = L.findTask(selectedTaskId);
+    var predictedSweepDeg = Math.min(minutes * 6, 359.9);
+    var elapsedSweepDeg = Math.min((finalElapsedSeconds / 60) * 6, 359.9);
+    var onTimeSweepDeg = Math.min(elapsedSweepDeg, predictedSweepDeg);
+    var overSweepDeg = Math.max(0, elapsedSweepDeg - predictedSweepDeg);
+
+    document.getElementById('result-clock').innerHTML = buildClockSvg(240, {
+      now: frozenNow,
+      startDeg: startMinuteAngle,
+      previewSweepDeg: 0,
+      onTimeSweepDeg: onTimeSweepDeg,
+      overSweepDeg: overSweepDeg,
+      predictedSweepDeg: predictedSweepDeg,
+      showGoalMarker: true,
+      color: task ? task.color : '#0071e3'
+    });
+  }
+
+  function renderResultScreen() {
+    var task = L.findTask(selectedTaskId);
+    document.getElementById('result-title').innerHTML = (task ? task.labelHtml : '') + 'の けっか';
+
+    var category = L.resultCategory(finalDiffSeconds);
+    var meta = RESULT_META[category];
+    document.getElementById('result-headline').style.background = meta.bg;
+    document.getElementById('result-headline-text').textContent = meta.text;
+    document.getElementById('result-headline-text').style.color = meta.fg;
+    document.getElementById('result-headline-icon').innerHTML = resultHeadlineIcon(category, meta.fg);
+
+    renderResultClock();
+
+    document.getElementById('result-predicted-display').textContent = L.formatClock(predictedMinutes() * 60);
+    document.getElementById('result-actual-display').textContent = L.formatClock(finalElapsedSeconds);
+
+    var diffCard = document.getElementById('result-diff-card');
+    var diffDisplay = document.getElementById('result-diff-display');
+    diffDisplay.textContent = L.formatSignedClock(finalDiffSeconds);
+    diffCard.style.background = meta.bg;
+    diffDisplay.style.color = meta.fg;
+  }
+
+  document.getElementById('again-btn').addEventListener('click', goToInput);
+
+  // ===== ticking =====
+
+  function tick() {
+    var visibleScreen = document.querySelector('.screen[style*="flex"]');
+    if (!visibleScreen) return;
+    if (visibleScreen.id === 'screen-input') renderInputClock();
+    else if (visibleScreen.id === 'screen-timer') renderTimerClock();
+  }
+  tickTimer = setInterval(tick, 1000);
+
+  goToInput();
+})();
+</script>
+
+</body>
+</html>
