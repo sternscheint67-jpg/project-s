@@ -119,7 +119,7 @@ button:disabled:active { transform: none; }
 .btn-done { background: var(--success); box-shadow: 0 4px 14px rgba(48,179,80,0.32); }
 .btn-again { background: var(--accent); box-shadow: 0 4px 14px rgba(0,113,227,0.32); }
 
-.top-bar { display: flex; align-items: center; justify-content: space-between; max-width: 900px; width: 100%; margin: 0 auto; }
+.top-bar { display: flex; align-items: center; justify-content: center; max-width: 900px; width: 100%; margin: 0 auto; }
 .task-chip { display: flex; align-items: center; gap: 8px; border-radius: 999px; padding: 6px 16px; font-size: 14px; font-weight: 700; }
 
 .timer-center { display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -193,9 +193,7 @@ button:disabled:active { transform: none; }
 <!-- ===================== Screen 2: 作業中のタイマー ===================== -->
 <div id="screen-timer" class="screen" style="display:none">
   <div class="top-bar">
-    <button id="quit-btn" class="link-btn">← やめる</button>
     <span id="timer-task-chip" class="task-chip"></span>
-    <span style="width:70px"></span>
   </div>
   <div class="timer-center">
     <div id="timer-clock"></div>
@@ -628,11 +626,6 @@ window.TimerLogic = {
     renderTimerTaskChip();
     renderTimerClock();
   }
-
-  document.getElementById('quit-btn').addEventListener('click', function() {
-    if (!confirm('タイマーを やめますか?')) return;
-    goToInput();
-  });
 
   document.getElementById('done-btn').addEventListener('click', function() {
     var now = Date.now();
