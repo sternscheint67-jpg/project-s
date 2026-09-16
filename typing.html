@@ -295,7 +295,8 @@ button:active { transform: scale(0.96); }
 </head>
 <body>
 
-<input id="hw-keyboard-catcher" type="text" inputmode="none" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="-1" aria-hidden="true" style="position:fixed; top:0; left:0; width:1px; height:1px; opacity:0; border:none; padding:0; margin:0; pointer-events:none;">
+<input id="hw-keyboard-catcher" type="text" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="-1" aria-hidden="true" style="position:fixed; top:0; left:0; width:1px; height:1px; opacity:0; border:none; padding:0; margin:0; pointer-events:none;">
+<div id="kbd-debug" style="position:fixed; bottom:2px; right:4px; font-size:9px; color:rgba(0,0,0,0.35); z-index:9999; pointer-events:none; font-family:monospace;"></div>
 
 <div id="screen-home" class="screen">
   <h1>タイピング<ruby>練習<rt>れんしゅう</rt></ruby></h1>
@@ -1032,15 +1033,23 @@ window.TypingCore = {
 
   // iPadOS Safari can fail to dispatch keydown from an attached hardware
   // keyboard at all unless a real text-editing element holds focus (the
-  // <body> itself doesn't reliably count). This hidden, always-empty input
-  // (inputmode="none" keeps the on-screen keyboard from popping up on
-  // touch-only iPads) keeps practice/word/sentence responsive to a
-  // hardware keyboard without being visible or interactive itself.
+  // <body> itself doesn't reliably count). This hidden, readonly input
+  // (readonly keeps the on-screen keyboard from popping up on touch-only
+  // iPads, unlike inputmode="none" which some WebKit versions also treat
+  // as "ignore hardware keydown here too") keeps practice/word/sentence
+  // responsive to a hardware keyboard without being visible or interactive.
   var hwKeyboardCatcher = document.getElementById('hw-keyboard-catcher');
-  hwKeyboardCatcher.addEventListener('input', function() { hwKeyboardCatcher.value = ''; });
   function focusHardwareKeyboardCatcher() {
     hwKeyboardCatcher.focus({ preventScroll: true });
   }
+
+  // Temporary on-screen diagnostic: shows the last keydown this page saw
+  // (key/code/keyCode), so if a key still doesn't work on a real device we
+  // can tell whether the event ever reached the page at all.
+  var kbdDebugEl = document.getElementById('kbd-debug');
+  document.addEventListener('keydown', function(e) {
+    kbdDebugEl.textContent = 'key:' + JSON.stringify(e.key) + ' code:' + e.code + ' keyCode:' + e.keyCode + ' target:' + e.target.tagName;
+  });
 
   var audioCtx = null;
   function ctx() {
@@ -1394,7 +1403,7 @@ window.TypingCore = {
     updateLaneSelectionVisual();
     updateWordStats();
     wordKeyHandler = function(e) {
-      if (e.key === ' ') {
+      if (e.key === ' ' || e.code === 'Space' || e.keyCode === 32 || e.key === 'Tab') {
         e.preventDefault();
         selectWordLane((wordSelectedLane + 1) % LANE_COUNT);
         return;
