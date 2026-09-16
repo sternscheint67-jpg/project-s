@@ -1016,6 +1016,18 @@ window.TypingCore = {
   }
   renderMascotIcons();
 
+  // The layout is sized for phone-width screens (max-width caps around
+  // 420-900px), so on an iPad's much larger display it renders small and
+  // surrounded by empty space. iPad reports itself as "Macintosh" in the
+  // user agent since iPadOS 13, so touch points + Mac platform is the
+  // standard way to detect it regardless of whether a trackpad (which
+  // would otherwise make a pointer-based media query miss it) is attached.
+  (function scaleUpForIPad() {
+    var isIPad = /iPad/.test(navigator.userAgent) ||
+      (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform));
+    if (isIPad) document.body.style.zoom = 1.5;
+  })();
+
   var bestGrades = loadBestGrades();
 
   function loadBestGrades() {
